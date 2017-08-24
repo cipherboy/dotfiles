@@ -1,0 +1,15 @@
+[user]
+	email = alexander.m.scheel@gmail.com
+	name = Alexander Scheel
+	signingkey = A973035E
+[credential]
+	helper = /usr/libexec/git-core/git-credential-libsecret
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg2
+[push]
+	default = simple
+[diff]
+	tool = vimdiff
+
