@@ -7,3 +7,5 @@ fi
 
 cp bashrc $HOME/.bashrc
 cp gitconfig $HOME/.gitconfig
+cp vimrc $HOME/.vimrc
+cp tmux.conf $HOME/.tmux.conf
