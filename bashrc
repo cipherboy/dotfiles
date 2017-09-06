@@ -4,6 +4,10 @@ for i in /etc/profile.d/*.sh; do
 	source $i
 done
 
+if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
+        source /etc/profile.d/vte.sh
+fi
+
 # Keep all history
 HISTSIZE=-1
 HISTFILESIZE=-1
@@ -49,6 +53,9 @@ alias gtr='git rebase -i '
 alias gtrc='git rebase --continue'
 alias gta='git add'
 alias gtm='git commit -s'
+alias gtp='git push'
+alias gts='git status'
+alias gtd='git diff'
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'

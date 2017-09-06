@@ -9,6 +9,6 @@ set shiftwidth=4
 set softtabstop=4
 set expandtab
 
-set colorcolumn=79
-hi ColorColumn ctermbg=lightgrey guibg=lightgrey
+" set colorcolumn=79
+" hi ColorColumn ctermbg=lightgrey guibg=lightgrey
 
