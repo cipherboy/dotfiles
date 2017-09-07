@@ -64,6 +64,17 @@ alias gif='grep --exclude=tags -iInHr'
 
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
 
+# Laptop aliases
+ldock() {
+    dconf write /org/gnome/settings-daemon/plugins/xsettings/overrides "{'Gdk/WindowScalingFactor': <1>}"
+    dconf write /org/gnome/desktop/interface/text-scaling-factor 0.75
+}
+
+lundock() {
+    dconf write /org/gnome/settings-daemon/plugins/xsettings/overrides "{'Gdk/WindowScalingFactor': <2>}"
+    dconf write /org/gnome/desktop/interface/text-scaling-factor 0.65
+}
+
 if [ -f `which powerline-daemon` ]; then
   powerline-daemon -q
   POWERLINE_BASH_CONTINUATION=1
