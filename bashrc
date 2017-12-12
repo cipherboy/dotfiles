@@ -79,6 +79,16 @@ lundock() {
     dconf write /org/gnome/desktop/interface/text-scaling-factor 0.65
 }
 
+# Upload images
+upload() {
+    img="$1"
+    extension="${img##*.}"
+    rimg="$RANDOM-$RANDOM.$extension"
+    echo "$img->$rimg"
+    scp "$img" "cipherboy:/home/website/cipherboy-website/i/$rimg"
+    echo "https://cipherboy.com/i/$rimg"
+}
+
 if [ -f `which powerline-daemon` ]; then
   powerline-daemon -q
   POWERLINE_BASH_CONTINUATION=1
