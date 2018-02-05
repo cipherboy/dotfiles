@@ -9,3 +9,4 @@ cp $HOME/.bashrc bashrc
 cp $HOME/.gitconfig gitconfig
 cp $HOME/.vimrc vimrc
 cp $HOME/.tmux.conf tmux.conf
+cp $HOME/.abcde.conf abcde.conf
