@@ -48,19 +48,21 @@ alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 alias cms="$HOME/GitHub/cryptominisat/cryptominisat5 ./problem.cnf"
 
 # git aliases
-alias gtc='git clone'
-alias gtr='git rebase -i '
-alias gtrc='git rebase --continue'
 alias gta='git add'
-alias gtm='git commit -s'
-alias gtp='git push'
-alias gtu='git pull'
-alias gts='git status'
+alias gtc='git clone'
 alias gtd='git diff'
 alias gtdc='git diff --cached'
 alias gtl='git log'
-alias gtsl='git shortlog -s -n'
+alias gtm='git commit -s'
 alias gto='git checkout'
+alias gtp='git push'
+alias gtr='git rebase -i '
+alias gtrc='git rebase --continue'
+alias gtre='git reset'
+alias gtrh='git reset HEAD'
+alias gts='git status'
+alias gtsl='git shortlog -s -n'
+alias gtu='git pull'
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'
