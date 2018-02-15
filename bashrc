@@ -60,6 +60,7 @@ alias gtd='git diff'
 alias gtdc='git diff --cached'
 alias gtl='git log'
 alias gtsl='git shortlog -s -n'
+alias gto='git checkout'
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'
