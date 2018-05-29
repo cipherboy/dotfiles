@@ -10,3 +10,7 @@ cp gitconfig $HOME/.gitconfig
 cp vimrc $HOME/.vimrc
 cp tmux.conf $HOME/.tmux.conf
 cp abcde.conf $HOME/.abcde.conf
+
+if [ x"$1" == "xagents" ]; then
+    bash ./agents/*.sh
+fi
