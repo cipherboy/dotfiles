@@ -52,6 +52,7 @@ alias gta='git add'
 alias gtb='git branch'
 alias gtc='git clone'
 alias gtd='git diff'
+alias gtdt='git difftool'
 alias gtdc='git diff --cached'
 alias gtl='git log'
 alias gtm='git commit -s'
@@ -71,7 +72,11 @@ alias gir='grep --exclude=tags -iIr'
 alias gic='grep --exclude=tags -nIHr'
 alias gif='grep --exclude=tags -iInHr'
 
+# project aliases
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
+alias fbuild='rm build -rf ; mkdir build ; cd build ; cmake .. && make -j5'
+alias fdbuild='rm build -rf ; mkdir build ; cd build ; cmake -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
+
 
 # Laptop aliases
 ldock() {
