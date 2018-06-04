@@ -49,6 +49,7 @@ alias cms="$HOME/GitHub/cryptominisat/cryptominisat5 ./problem.cnf"
 
 # git aliases
 alias gta='git add'
+alias gtb='git branch'
 alias gtc='git clone'
 alias gtd='git diff'
 alias gtdc='git diff --cached'
@@ -63,6 +64,7 @@ alias gtrh='git reset HEAD'
 alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
+alias gtum='git pull upstream master'
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'
