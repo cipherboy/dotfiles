@@ -65,7 +65,7 @@ alias gtrh='git reset HEAD'
 alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
-alias gtum='git pull upstream master'
+alias gtum='git checkout master && git pull upstream master && git push'
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'
@@ -74,8 +74,8 @@ alias gif='grep --exclude=tags -iInHr'
 
 # project aliases
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
-alias fbuild='rm build -rf ; mkdir build ; cd build ; cmake .. && make -j5'
-alias fdbuild='rm build -rf ; mkdir build ; cd build ; cmake -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
+alias fbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake .. && make -j5'
+alias fdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
 
 
 # Laptop aliases
