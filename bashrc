@@ -4,7 +4,7 @@ for i in /etc/profile.d/*.sh; do
 	source $i
 done
 
-if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
+if [ "$TILIX_ID" ] || [ "$VTE_VERSION" ]; then
         source /etc/profile.d/vte.sh
 fi
 
@@ -13,7 +13,7 @@ HISTSIZE=-1
 HISTFILESIZE=-1
 
 # Force pretty colors
-eval "`dircolors`"
+eval "$(dircolors)"
 alias ls="ls --color=auto --group-directories-first"
 alias grep="grep --color=auto"
 
@@ -39,13 +39,9 @@ alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
 ## PS1
 PS1='[\u@\h \W]\$ '
 
-PANEL_FIFO="/tmp/panel-fifo"
-
-export PATH="$GOPATH/bin:$HOME/.rbenv/bin:/usr/local/go/bin:/opt/bin:/opt/node/bin:/usr/games/bin:$HOME/bin:/usr/local/racket/bin:$PATH"
+export PATH="/usr/lib64/ccache:$GOPATH/bin:$HOME/.rbenv/bin:/usr/local/go/bin:/opt/bin:/opt/node/bin:/usr/games/bin:$HOME/bin:/usr/local/racket/bin:$PATH"
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
-
-alias cms="$HOME/GitHub/cryptominisat/cryptominisat5 ./problem.cnf"
 
 # git aliases
 alias gta='git add'
@@ -54,11 +50,17 @@ alias gtc='git clone'
 alias gtd='git diff'
 alias gtdt='git difftool'
 alias gtdc='git diff --cached'
+alias gtdh='git diff HEAD~'
+alias gtfp='git push --force'
 alias gtl='git log'
 alias gtm='git commit -s'
+alias gtma='git commit -s --amend'
 alias gto='git checkout'
+alias gtob='git checkout -b'
 alias gtp='git push'
-alias gtr='git rebase -i '
+alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
+alias gtr='git rebase'
+alias gtrm='git rebase -i master'
 alias gtrc='git rebase --continue'
 alias gtre='git reset'
 alias gtrh='git reset HEAD'
@@ -66,6 +68,10 @@ alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
 alias gtum='git checkout master && git pull upstream master && git push'
+function gtub() {
+    local branch=$1
+    git checkout "$branch" && git pull upstream "$branch" && git push
+}
 
 # grep aliases
 alias gir='grep --exclude=tags -iIr'
@@ -74,8 +80,10 @@ alias gif='grep --exclude=tags -iInHr'
 
 # project aliases
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
-alias fbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake .. && make -j5'
-alias fdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
+alias fbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake .. && time make -j5'
+alias fcbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ .. && make -j5'
+alias fdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
+alias fcdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
 
 
 # Laptop aliases
