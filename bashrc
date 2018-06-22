@@ -82,9 +82,14 @@ function ghr() {
     local owner="$2"
     local branch="$3"
     mkdir -p "$HOME/GitHub/$owner"
-    cd "$HOME/GitHub/$owner" || (echo "cd failed" ;)
-    git clone "https://github.com/$owner/$project"
+    cd "$HOME/GitHub/$owner"
+    if [ ! -d "$project" ]; then
+        git clone "https://github.com/$owner/$project"
+    fi
+
     cd "$project"
+    git checkout master
+    git pull origin
     git checkout "$branch"
     build
 }
@@ -101,6 +106,7 @@ function ghlink() {
 
     echo "$url/blob/$branch/$path#L$line"
 }
+
 
 # grep aliases
 alias gir='grep --exclude=tags --exclude-dir=.git -iIr'
@@ -166,6 +172,10 @@ function build() {
                 do_debug=true
             elif [ "x$arg" == "xmake" ]; then
                 which_ninja=""
+            elif [ "x$arg" == "xpython2" ]; then
+                cmake_args="$cmake_args -DPYTHON_EXECUTABLE=/usr/bin/python2"
+            elif [ "x$arg" == "xpython3" ]; then
+                cmake_args="$cmake_args -DPYTHON_EXECUTABLE=/usr/bin/python3"
             fi
         done
     fi
