@@ -77,6 +77,17 @@ function gtub() {
     local branch=$1
     git checkout "$branch" && git pull upstream "$branch" && git push
 }
+function ghr() {
+    local project="$1"
+    local owner="$2"
+    local branch="$3"
+    mkdir -p "$HOME/GitHub/$owner"
+    cd "$HOME/GitHub/$owner" || (echo "cd failed" ;)
+    git clone "https://github.com/$owner/$project"
+    cd "$project"
+    git checkout "$branch"
+    build
+}
 function ghlink() {
     local path="$1"
     local line="$2"
@@ -92,9 +103,9 @@ function ghlink() {
 }
 
 # grep aliases
-alias gir='grep --exclude=tags -iIr'
-alias gic='grep --exclude=tags -nIHr'
-alias gif='grep --exclude=tags -iInHr'
+alias gir='grep --exclude=tags --exclude-dir=.git -iIr'
+alias gic='grep --exclude=tags --exclude-dir=.git -nIHr'
+alias gif='grep --exclude=tags --exclude-dir=.git -iInHr'
 function gitc() {
     local query=$1
     grep -ro "$query" | wc -l
@@ -108,7 +119,7 @@ alias fdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="
 alias fcdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -D CMAKE_BUILD_TYPE=Debug .. && make -j5'
 
 # Build SCAP Security Guide
-alias sgbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake -G Ninja -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache .. && time ninja'
+alias sgbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; time cmake -G Ninja -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache .. && time ninja'
 alias sgcbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache .. && ninja'
 alias sgdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache .. && ninja'
 alias sgcdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -D CMAKE_BUILD_TYPE=Debug -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache .. && ninja'
@@ -122,6 +133,131 @@ alias swdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS=
 alias swcdbuild='rm build -rf ; mkdir build ; cd build ; touch .gitkeep ; CFLAGS="-Wall -Wextra -Og -ggdb" CXXFLAGS="-Wall -Wextra -Og -ggdb" cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -D CMAKE_BUILD_TYPE=Debug .. && ninja'
 
 alias pep8='python3-pep8 *.py'
+
+function build() {
+    local which_ninja="$(which ninja)"
+    if [ "x$which_ninja" == "x" ]; then
+        which_ninja="$(which ninja-build)"
+    fi
+
+    local which_clang="$(which clang)"
+    local which_clangpp="$(which clang++)"
+
+    local do_prep=false
+    local do_build=false
+    local do_debug=false
+    local do_cmake_debug=false
+    local use_clang=false
+    local cmake_args=""
+
+    if [[ $# -eq 0 ]]; then
+        do_prep=true
+        do_build=true
+    else
+        for arg in "$@"; do
+            if [ "x$arg" == "xprep" ]; then
+                do_prep=true
+            elif [ "x$arg" == "xbuild" ]; then
+                do_build=true
+            elif [ "x$arg" == "xclang" ]; then
+                use_clang=true
+            elif [ "x$arg" == "xdebug" ]; then
+                cmake_args="$cmake_args -DCMAKE_BUILD_TYPE=Debug"
+                do_debug=true
+            elif [ "x$arg" == "xmake" ]; then
+                which_ninja=""
+            fi
+        done
+    fi
+
+    if [ "$do_prep" == "false" ] && [ "$do_build" == "false" ]; then
+        do_prep="true"
+        do_build="true"
+    fi
+
+    if [ $use_clang ] && [ "x$which_clang" == "x" ]; then
+        use_clang=false
+    fi
+
+    if [ "$use_clang" == "true" ]; then
+        if [ "x$which_clang" != "x" ]; then
+            cmake_args="$cmake_args -DCMAKE_C_COMPILER=clang"
+        elif [ "x$which_clangpp" != "x" ]; then
+            cmake_args="$cmake_args -DCMAKE_CXX_COMPILER=clang++"
+        fi
+    fi 
+
+    function __build_cd() {
+        local pwd="$(pwd)"
+        local git_root="$(git rev-parse --show-toplevel)"
+        if [ "x$pwd" != "x$git_root" ]; then
+            cd "$git_root"
+        fi
+    }
+
+    function __build_prep_cmake_ninja() {
+        time cmake $cmake_args -G Ninja .. 
+    }
+
+    function __build_prep_cmake_make() {
+        time cmake $cmake_args -G "Unix Makefiles" ..
+    }
+
+    function __build_prep_cmake() {
+        local have_build_gitkeep=false
+        if [ -e "build/.gitkeep" ]; then
+            have_build_gitkeep=true
+        fi
+
+        rm -rf build && mkdir -p build && cd build
+        if [ $have_build_gitkeep ]; then
+            touch .gitkeep
+        fi
+
+        if [ "x$which_ninja" == "x" ]; then
+            echo "Prepping with cmake/make"
+            __build_prep_cmake_make
+        else
+            echo "Prepping with cmake/ninja"
+            __build_prep_cmake_ninja
+        fi
+    }
+
+    function __build_prep() {
+        if [ -e "CMakeLists.txt" ]; then
+            __build_prep_cmake
+        else
+            echo "Cannot build: unknown build system"
+        fi 
+    }
+
+    function __build_make() {
+        time make
+    }
+
+    function __build_ninja() {
+        time $which_ninja
+    }
+
+    function __build() {
+        if [ "x$which_ninja" == "x" ] && [ ! -e "build.ninja" ]; then
+            echo "Building with make"
+            __build_make
+        else
+            echo "Building with ninja"
+            __build_ninja
+        fi
+    }
+
+    __build_cd
+
+    if [ "$do_prep" == "true" ]; then
+        __build_prep
+    fi
+    if [ "$do_build" == "true" ]; then
+        __build
+    fi
+}
 
 # Laptop aliases
 ldock() {
