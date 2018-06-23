@@ -1,7 +1,7 @@
 function build() {
-    local which_ninja="$(which ninja)"
+    local which_ninja="$(which ninja 2>/dev/null)"
     if [ "x$which_ninja" == "x" ]; then
-        which_ninja="$(which ninja-build)"
+        which_ninja="$(which ninja-build 2>/dev/null)"
     fi
 
     local which_clang="$(which clang 2>/dev/null)"
@@ -72,7 +72,11 @@ function build() {
 
     function __build_cd() {
         local pwd="$(pwd)"
-        local git_root="$(git rev-parse --show-toplevel)"
+        local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+        if [ "x$git_root" == "x" ]; then
+            return
+        fi
+
         if [ "x$pwd" != "x$git_root" ]; then
             cd "$git_root"
         fi
@@ -160,6 +164,7 @@ function build() {
             echo "Building with make"
             __build_make
         elif [ -e "setup.py" ]; then
+            echo "Building with setup.py"
             __build_python
         else
             echo "Unknown build system!"
