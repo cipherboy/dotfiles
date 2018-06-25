@@ -83,11 +83,11 @@ function build() {
     }
 
     function __build_prep_cmake_ninja() {
-        CFLAGS="$clflags" CXXFLAGS="$cxxflags" time cmake $cmake_args -G Ninja ..
+        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G Ninja ..
     }
 
     function __build_prep_cmake_make() {
-        CFLAGS="$clflags" CXXFLAGS="$cxxflags" time cmake $cmake_args -G "Unix Makefiles" ..
+        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G "Unix Makefiles" ..
     }
 
     function __build_prep_cmake() {
@@ -116,9 +116,9 @@ function build() {
         fi
 
         if [ ! -e "configure" ]; then
-            time autoreconf -f -i
+            time -p autoreconf -f -i
         fi
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time ./configure
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p ./configure
     }
 
     function __build_prep_python_setuptools() {
@@ -145,11 +145,11 @@ function build() {
     }
 
     function __build_make() {
-        time make
+        time -p make
     }
 
     function __build_ninja() {
-        time $which_ninja
+        time -p $which_ninja
     }
 
     function __build_python() {
