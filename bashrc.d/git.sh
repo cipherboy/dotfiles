@@ -2,6 +2,10 @@
 alias gta='git add'
 alias gtb='git branch'
 alias gtc='git clone'
+function gtcd() {
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    cd "$git_root"
+}
 alias gtcp='git cherry-pick'
 alias gtcpc='git cherry-pick --continue'
 alias gtd='git diff'
@@ -27,7 +31,12 @@ alias gtrm='git rebase -i master'
 alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
-alias gtum='git checkout master && git pull upstream master && git push'
+
+function gtum() {
+    local branch="$(git rev-parse --abbrev-ref HEAD)"
+    git checkout master && git pull origin master && git pull upstream master && git push
+    git checkout "$branch"
+}
 
 function gtub() {
     local current=
