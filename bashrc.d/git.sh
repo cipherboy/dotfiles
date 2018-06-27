@@ -33,15 +33,56 @@ alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
 
 function gtum() {
-    local branch="$(git rev-parse --abbrev-ref HEAD)"
+    local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     git checkout master && git pull origin master && git pull upstream master && git push
     git checkout "$branch"
 }
 
 function gtub() {
-    local current=
+    local current="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     local branch=$1
-    git checkout "$branch" && git pull upstream "$branch" && git push
+    git checkout "$branch" && git pull origin $branch && git pull upstream "$branch" && git push
+    git checkout "$current"
+}
+
+function ghcd() {
+    local gitbase="$HOME"
+    local provider="GitHub"
+    local username="cipherboy"
+    local repository="dotfiles"
+
+    if (( $# == 1 )); then
+        repository="$1"
+    elif (( $# == 2 )); then
+        username="$1"
+        repository="$2"
+    elif (( $# == 3 )); then
+        provider="$1"
+        username="$2"
+        repository="$3"
+    elif (( $# == 4 )); then
+        gitbase="$1"
+        provider="$2"
+        username="$3"
+        repository="$4"
+    fi
+
+    local path="$gitbase/$provider/$username/$repository"
+    if [ -d "$path" ]; then
+        cd "$path"
+    else
+        path=""
+        for d in "$gitbase"/"$provider"/*/"$repository"; do
+            if [ -d "$d/.git" ]; then
+                path="$d"
+                break
+            fi
+        done
+
+        if [ "x$path" != "x" ] && [ -d "$path" ]; then
+            cd "$path"
+        fi
+    fi
 }
 
 function ghr() {
