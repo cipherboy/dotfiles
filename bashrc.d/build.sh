@@ -11,6 +11,7 @@ function build() {
     local do_build="false"
     local do_debug="false"
     local do_cmake_debug="false"
+    local do_popd="true"
     local use_clang="false"
     local use_parallel="true"
     local cmake_args=""
@@ -21,6 +22,7 @@ function build() {
     local py2path="$(which python2 2>/dev/null)"
     local py3path="$(which python3 2>/dev/null)"
     local pypath="$py3path"
+    local starting_dir="$(pwd 2>/dev/null)"
 
     for arg in "$@"; do
         if [ "x$arg" == "xprep" ]; then
@@ -48,6 +50,8 @@ function build() {
             pypath="$py2path"
         elif [ "x$arg" == "xpython3" ]; then
             pypath="$py3path"
+        elif [ "x$arg" == "xnopop" ]; then
+            do_popd="false"
         fi
     done
 
@@ -71,13 +75,12 @@ function build() {
     cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath"
 
     function __build_cd() {
-        local pwd="$(pwd)"
         local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
         if [ "x$git_root" == "x" ]; then
             return
         fi
 
-        if [ "x$pwd" != "x$git_root" ]; then
+        if [ "x$starting_dir" != "x$git_root" ]; then
             cd "$git_root"
         fi
     }
@@ -171,6 +174,14 @@ function build() {
         fi
     }
 
+    function __build_uncd() {
+        local cpwd="$(pwd 2>/dev/null)"
+
+        if [ "x$cpwd" != "x" ] && [ "x$cpwd" != "x$starting_dir" ]; then
+            cd "$starting_dir"
+        fi
+    }
+
     __build_cd
 
     if [ "$do_prep" == "true" ]; then
@@ -178,5 +189,9 @@ function build() {
     fi
     if [ "$do_build" == "true" ]; then
         __build
+    fi
+
+    if [ "$do_popd" == "true" ]; then
+        __build_uncd
     fi
 }
