@@ -48,6 +48,8 @@ alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 alias gir='grep --exclude=tags --exclude-dir=.git -iIr'
 alias gic='grep --exclude=tags --exclude-dir=.git -nIHr'
 alias gif='grep --exclude=tags --exclude-dir=.git -iInHr'
+alias gff='find . -path "*.git*" -prune -o -print | grep -i'
+
 function gitc() {
     local query=$1
     grep -ro "$query" | wc -l
