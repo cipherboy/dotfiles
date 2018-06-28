@@ -72,7 +72,7 @@ function build() {
         fi
     fi
 
-    cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath"
+    cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
 
     function __build_cd() {
         local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
