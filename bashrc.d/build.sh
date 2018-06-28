@@ -169,6 +169,12 @@ function build() {
         elif [ -e "setup.py" ]; then
             echo "Building with setup.py"
             __build_python
+        elif [ -d "build" ]; then
+            cd build
+            __build
+        elif [ -d "src" ]; then
+            cd src
+            __build
         else
             echo "Unknown build system!"
         fi

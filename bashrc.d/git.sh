@@ -4,7 +4,7 @@ alias gtb='git branch'
 alias gtc='git clone'
 function gtcd() {
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
-    cd "$git_root"
+    pushd "$git_root"
 }
 alias gtcp='git cherry-pick'
 alias gtcpc='git cherry-pick --continue'
@@ -69,7 +69,7 @@ function ghcd() {
 
     local path="$gitbase/$provider/$username/$repository"
     if [ -d "$path" ]; then
-        cd "$path"
+        pushd "$path"
     else
         path=""
         for d in "$gitbase"/"$provider"/*/"$repository"; do
@@ -80,7 +80,7 @@ function ghcd() {
         done
 
         if [ "x$path" != "x" ] && [ -d "$path" ]; then
-            cd "$path"
+            pushd "$path"
         fi
     fi
 }
