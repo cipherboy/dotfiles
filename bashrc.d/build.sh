@@ -67,7 +67,8 @@ function build() {
     if [ "$use_clang" == "true" ]; then
         if [ "x$which_clang" != "x" ]; then
             ccpath="$which_clang"
-        elif [ "x$which_clangpp" != "x" ]; then
+        fi
+        if [ "x$which_clangpp" != "x" ]; then
             cxxpath="$which_clangpp"
         fi
     fi
@@ -87,10 +88,12 @@ function build() {
 
     function __build_prep_cmake_ninja() {
         CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G Ninja ..
+        return $?
     }
 
     function __build_prep_cmake_make() {
         CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G "Unix Makefiles" ..
+        return $?
     }
 
     function __build_prep_cmake() {
@@ -107,9 +110,11 @@ function build() {
         if [ "x$which_ninja" == "x" ]; then
             echo "Prepping with cmake/make"
             __build_prep_cmake_make
+            return $?
         else
             echo "Prepping with cmake/ninja"
             __build_prep_cmake_ninja
+            return $?
         fi
     }
 
@@ -122,6 +127,7 @@ function build() {
             time -p autoreconf -f -i
         fi
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p ./configure
+        return $?
     }
 
     function __build_prep_python_setuptools() {
@@ -130,53 +136,68 @@ function build() {
             rm -rf "build"
         fi
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath ./setup.py check
+        return $?
     }
 
     function __build_prep() {
         if [ -e "CMakeLists.txt" ]; then
             __build_prep_cmake
+            return $?
         elif [ -e "configure.ac" ] || [ -e "configure.in" ]; then
             __build_prep_autotools
+            return $?
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
+            return $?
         elif [ -d "src" ]; then
             cd src
             __build_prep
+            return $?
         else
             echo "Cannot build: unknown build system"
+            return 1
         fi
     }
 
     function __build_make() {
         time -p make
+        return $?
     }
 
     function __build_ninja() {
         time -p $which_ninja
+        return $?
     }
 
     function __build_python() {
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath ./setup.py build
+        return $?
     }
 
     function __build() {
         if [ "x$which_ninja" != "x" ] && [ -e "build.ninja" ]; then
             echo "Building with ninja"
             __build_ninja
+            return $?
         elif [ -e "Makefile" ]; then
             echo "Building with make"
             __build_make
+            return $?
         elif [ -e "setup.py" ]; then
             echo "Building with setup.py"
             __build_python
+            return $?
         elif [ -d "build" ]; then
             cd build
             __build
+            return $?
         elif [ -d "src" ]; then
             cd src
             __build
+            return $?
         else
             echo "Unknown build system!"
+            return 1
         fi
     }
 
@@ -192,12 +213,21 @@ function build() {
 
     if [ "$do_prep" == "true" ]; then
         __build_prep
+        ret="$?"
+        if (( $ret != 0 )); then
+            return $ret
+        fi
     fi
     if [ "$do_build" == "true" ]; then
         __build
+        ret="$?"
+        if (( $ret != 0 )); then
+            return $ret
+        fi
     fi
 
     if [ "$do_popd" == "true" ]; then
         __build_uncd
     fi
+    return 0
 }
