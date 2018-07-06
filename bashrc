@@ -80,6 +80,10 @@ upload() {
     echo "https://cipherboy.com/i/$rimg"
 }
 
+function load() {
+    source "$HOME/.bashrc.d/$1.bash"
+}
+
 for script in $HOME/.bashrc.d/*.sh; do
     source "$script"
 done

@@ -31,6 +31,11 @@ alias gtrm='git rebase -i master'
 alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
+function gtuf() {
+    local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+    git pull origin "$branch"
+    git reset --hard "origin/$branch"
+}
 
 function gtum() {
     local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
