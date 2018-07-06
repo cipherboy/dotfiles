@@ -9,12 +9,16 @@ function build() {
 
     local do_prep="false"
     local do_build="false"
+    local do_test="false"
     local do_debug="false"
     local do_cmake_debug="false"
     local do_popd="true"
     local use_clang="false"
     local use_parallel="true"
     local cmake_args=""
+    local make_args=""
+    local ninja_args=""
+    local ctest_args=""
     local cflags="$CFLAGS"
     local cxxflags="$CXXFLAGS"
     local ccpath="$(which gcc 2>/dev/null)"
@@ -29,10 +33,17 @@ function build() {
             do_prep="true"
         elif [ "x$arg" == "xbuild" ]; then
             do_build="true"
+        elif [ "x$arg" == "xtest" ]; then
+            do_test="true"
+        elif [ "x$arg" == "all" ]; then
+            do_prep="true"
+            do_build="true"
+            do_test="true"
         elif [ "x$arg" == "xclang" ]; then
             use_clang="true"
         elif [ "x$arg" == "xdebug" ]; then
             cmake_args="$cmake_args -DCMAKE_BUILD_TYPE=Debug"
+            ctest_args="$ctest_args --debug"
             cflags="$cflags -Og -ggdb"
             cxxflags="$cxxflags -Og -ggdb"
             do_debug="true"
@@ -55,7 +66,7 @@ function build() {
         fi
     done
 
-    if [ "$do_prep" == "false" ] && [ "$do_build" == "false" ]; then
+    if [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
         do_prep="true"
         do_build="true"
     fi
@@ -71,6 +82,18 @@ function build() {
         if [ "x$which_clangpp" != "x" ]; then
             cxxpath="$which_clangpp"
         fi
+    fi
+
+    if [ "$use_parallel" == "true" ]; then
+        local num_cores="$(cat /proc/cpuinfo | grep '^processor[[:space:]]*:' | wc -l)"
+        num_cores=$(( $num_cores + 2 ))
+        make_args="$make_args -j $num_cores"
+        ninja_args="$ninja_args -j $num_cores"
+        ctest_args="$ctest_args -j $num_cores"
+    else
+        make_args="$make_args -j 1"
+        ninja_args="$ninja_args -j 1"
+        ctest_args="$ctest_args -j 1"
     fi
 
     cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
@@ -160,12 +183,12 @@ function build() {
     }
 
     function __build_make() {
-        time -p make
+        time -p make $make_args
         return $?
     }
 
     function __build_ninja() {
-        time -p $which_ninja
+        time -p $which_ninja $ninja_args
         return $?
     }
 
@@ -201,6 +224,37 @@ function build() {
         fi
     }
 
+    function __build_test_ctest() {
+        time -p ctest $ctest_args
+        return $?
+    }
+
+    function __build_test_make() {
+        time -p make check
+        return $?
+    }
+
+    function __build_test() {
+        if [ -e "CMakeCache.txt" ]; then
+            __build_test_ctest
+            return $?
+        elif [ -e "Makefile" ]; then
+            __build_test_make
+            return $?
+        elif [ -d "build" ]; then
+            cd build
+            __build_test
+            return $?
+        elif [ -d "src" ]; then
+            cd src
+            __build_test
+            return $?
+        else
+            echo "Unknown test system!"
+            return 1
+        fi
+    }
+
     function __build_uncd() {
         local cpwd="$(pwd 2>/dev/null)"
 
@@ -215,13 +269,25 @@ function build() {
         __build_prep
         ret="$?"
         if (( $ret != 0 )); then
+            echo "Prep failed with status: $ret"
             return $ret
         fi
     fi
+
     if [ "$do_build" == "true" ]; then
         __build
         ret="$?"
         if (( $ret != 0 )); then
+            echo "Build failed with status: $ret"
+            return $ret
+        fi
+    fi
+
+    if [ "$do_test" == "true" ]; then
+        __build_test
+        ret="$?"
+        if (( $ret != 0 )); then
+            echo "Test failed with status: $ret"
             return $ret
         fi
     fi
