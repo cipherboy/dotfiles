@@ -56,3 +56,14 @@ function r6r() {
         git commit -m "Remove $file"
     done
 }
+
+function find_rules() {
+    local guide_path="$1"
+    for oval_file in *.xml; do
+        local object="$(echo "$oval_file" | sed 's/\.xml$//g')"
+        local found="$(find "$guide_path" -path "*.git*" -prune -o -print | grep "$object")"
+        if [ "x$found" == "x" ]; then
+            echo "Missing rule for oval: $object"
+        fi
+    done
+}
