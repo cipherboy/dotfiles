@@ -33,7 +33,8 @@ function __do_install() {
         echo "Installing bash..."
         cp -v bashrc $HOME/.bashrc
         rm -vrf $HOME/.bashrc.d
-        cp -rv bashrc.d $HOME/.bashrc.d
+        mkdir -p "$HOME/.bashrc.d"
+        cp -rv bashrc.d/* $HOME/.bashrc.d/
     fi
 
     if [ "$do_install_git" == "true" ]; then
