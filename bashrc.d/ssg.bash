@@ -58,12 +58,34 @@ function r6r() {
 }
 
 function find_rules() {
-    local guide_path="$1"
-    for oval_file in *.xml; do
-        local object="$(echo "$oval_file" | sed 's/\.xml$//g')"
-        local found="$(find "$guide_path" -path "*.git*" -prune -o -print | grep "$object")"
+    local extension="$1"
+    local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
+    for _file in "$base_dir"/*/checks/oval/*."$extension" "$base_dir"/*/fixes/*/*."$extension"; do
+        local file="$(basename "$_file")"
+        local object="$(echo "$file" | sed "s/\\.$extension\$//g")"
+        local found="$(find "$base_dir"/*/guide -path "*.git*" -prune -o -print | grep "\\/$object\\.")"
         if [ "x$found" == "x" ]; then
-            echo "Missing rule for oval: $object"
+            echo "object without rule/group/var: $object"
+        fi
+    done
+}
+
+function find_profiles() {
+    local extension="$1"
+    local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
+    for _file in "$base_dir"/*/checks/oval/*."$extension" "$base_dir"/*/fixes/*/*."$extension"; do
+        local file="$(basename "$_file")"
+        local object="$(echo "$file" | sed "s/\\.$extension\$//g")"
+        local found=""
+        for profile in "$base_dir"/*/profiles/*.profile; do
+            profile_found="$(grep "$object" "$profile")"
+            found="$found$profile_found"
+            if [ "x$found" != "x" ]; then
+                break
+            fi
+        done
+        if [ "x$found" == "x" ]; then
+            echo "unused object: $object"
         fi
     done
 }
