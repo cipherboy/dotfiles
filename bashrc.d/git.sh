@@ -51,14 +51,14 @@ function gtuf() {
 
 function gtum() {
     local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
-    git checkout master && git pull origin master && git pull upstream master && git push
+    git checkout master && git pull && git pull origin master && git pull upstream master && git push
     git checkout "$branch"
 }
 
 function gtub() {
     local current="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     local branch=$1
-    git checkout "$branch" && git pull origin $branch && git pull upstream "$branch" && git push
+    git checkout "$branch" && git pull && git pull origin $branch && git pull upstream "$branch" && git push
     git checkout "$current"
 }
 
