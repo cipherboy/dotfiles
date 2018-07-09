@@ -152,3 +152,21 @@ function ghl() {
     fi
     echo "$urlpath"
 }
+
+function gtpoffline() {
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    echo "$git_root" >> ~/.git_offline_push
+}
+
+function gtponline() {
+    local line="$(head -n 1 ~/.git_offline_push)"
+    while [ "x$line" != "x" ]; do
+        pushd "$line"
+        git push
+        popd
+        head -n -1 ~/.git_offline_push > ~/.git_offline_push.tmp
+        mv ~/.git_offline_push.tmp ~/.git_offline_push
+        line="$(head -n 1 ~/.git_offline_push)"
+    done
+    rm ~/.git_offline_push
+}
