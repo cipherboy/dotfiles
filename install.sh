@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ x"$HOME" == x ]; then
+if [ "x$HOME" == "x" ]; then
     echo "\$HOME IS NOT SET. REFUSING TO MAKE CHANGES"
     exit 1
 fi
@@ -12,20 +12,31 @@ function __do_install() {
     local do_install_tmux="false"
     local do_install_abcde="false"
     local do_install_git="false"
+    local do_install_tlp="false"
 
     for arg in "$@"; do
-        if [ "x$arg" == "xbash" ]; then
-            local do_install_bash="true"
+        if [ "x$arg" == "xall" ]; then
+            do_install_agents="true"
+            do_install_bash="true"
+            do_install_vimrc="true"
+            do_install_tmux="true"
+            do_install_abcde="true"
+            do_install_git="true"
+            do_install_tlp="true"
+        elif [ "x$arg" == "xbash" ]; then
+            do_install_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
-            local do_install_vimrc="true"
+            do_install_vimrc="true"
         elif [ "x$arg" == "xtmux" ]; then
-            local do_install_tmux="true"
+            do_install_tmux="true"
         elif [ "x$arg" == "xabcde" ]; then
-            local do_install_abcde="true"
+            do_install_abcde="true"
         elif [ "x$arg" == "xgit" ]; then
-            local do_install_git="true"
+            do_install_git="true"
         elif [ "x$arg" == "xagents" ]; then
-            local do_install_agents="true"
+            do_install_agents="true"
+        elif [ "x$arg" == "xtlp" ]; then
+            do_install_tlp="true"
         fi
     done
 
@@ -55,6 +66,11 @@ function __do_install() {
     if [ "$do_install_abcde" == "true" ]; then
         echo "Installing abcde..."
         cp -v abcde.conf $HOME/.abcde.conf
+    fi
+
+    if [ "$do_install_tlp" == "true" ]; then
+        echo "Installing tlp..."
+        cp -v tlp /etc/default/tlp
     fi
 
     if [ "$do_install_agents" == "true" ]; then
