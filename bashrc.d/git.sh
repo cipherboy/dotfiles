@@ -121,7 +121,7 @@ function ghr() {
     git checkout master
     git pull origin
     git checkout "$branch"
-    build
+    build prep build test
 }
 
 function ghl() {
@@ -169,4 +169,35 @@ function gtponline() {
         line="$(head -n 1 ~/.git_offline_push)"
     done
     rm ~/.git_offline_push
+}
+
+function gtse() {
+    local email="$1"
+    if [ "x$email" == "xwork" ] || [ "x$email" == "xw" ]; then
+        email="$(cat ~/.git_email_work)"
+    elif [ "x$email" == "personal" ] || [ "x$email" == "xp" ]; then
+        email="$(cat ~/.git_email_personal)"
+    fi
+    git config user.email "$email"
+}
+
+function gtseg() {
+    local email="$1"
+    if [ "x$email" == "xwork" ]; then
+        email="$(cat ~/.git_email_work)"
+    elif [ "x$email" == "personal" ]; then
+        email="$(cat ~/.git_email_personal)"
+    fi
+    git config --global user.email "$email"
+}
+
+function gtrsp() {
+    local current="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+    git rebase -i "origin/$current"
+    ret=$?
+    while (( ret == 0 )); do
+        git commit --amend --reset-author --signoff
+        git rebase --continue
+        ret=$?
+    done
 }
