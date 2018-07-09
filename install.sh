@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "x$HOME" == "x" ]; then
     echo "\$HOME IS NOT SET. REFUSING TO MAKE CHANGES"
@@ -42,30 +42,30 @@ function __do_install() {
 
     if [ "$do_install_bash" == "true" ]; then
         echo "Installing bash..."
-        cp -v bashrc $HOME/.bashrc
-        rm -vrf $HOME/.bashrc.d
+        cp -v bashrc "$HOME/.bashrc"
+        rm -vrf "$HOME/.bashrc.d"
         mkdir -p "$HOME/.bashrc.d"
-        cp -rv bashrc.d/* $HOME/.bashrc.d/
+        cp -rv bashrc.d/* "$HOME/.bashrc.d/"
     fi
 
     if [ "$do_install_git" == "true" ]; then
         echo "Installing git..."
-        cp -v gitconfig $HOME/.gitconfig
+        cp -v gitconfig "$HOME/.gitconfig"
     fi
 
     if [ "$do_install_vimrc" == "true" ]; then
         echo "Installing vimrc..."
-        cp -v vimrc $HOME/.vimrc
+        cp -v vimrc "$HOME/.vimrc"
     fi
 
     if [ "$do_install_tmux" == "true" ]; then
         echo "Installing tmux..."
-        cp -v tmux.conf $HOME/.tmux.conf
+        cp -v tmux.conf "$HOME/.tmux.conf"
     fi
 
     if [ "$do_install_abcde" == "true" ]; then
         echo "Installing abcde..."
-        cp -v abcde.conf $HOME/.abcde.conf
+        cp -v abcde.conf "$HOME/.abcde.conf"
     fi
 
     if [ "$do_install_tlp" == "true" ]; then
