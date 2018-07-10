@@ -32,6 +32,27 @@ alias gts='git status'
 alias gtsl='git shortlog -s -n'
 alias gtu='git pull'
 
+function gtbs() {
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    pushd $git_root >/dev/null 2>/dev/null
+        git bisect skip
+    popd >/dev/null 2>/dev/null
+}
+
+function gtbg() {
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    pushd $git_root >/dev/null 2>/dev/null
+        git bisect good
+    popd >/dev/null 2>/dev/null
+}
+
+function gtbb() {
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    pushd $git_root >/dev/null 2>/dev/null
+        git bisect bad
+    popd >/dev/null 2>/dev/null
+}
+
 function gtcpb() {
     local current="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     local branch=$1
@@ -156,6 +177,8 @@ function ghl() {
 function gtpoffline() {
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
     echo "$git_root" >> ~/.git_offline_push
+    sort -u ~/.git_offline_push > ~/.git_offline_push.tmp
+    mv ~/.git_offline_push.tmp ~/.git_offline_push
 }
 
 function gtponline() {
