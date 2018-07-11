@@ -35,7 +35,7 @@ function build() {
             do_build="true"
         elif [ "x$arg" == "xtest" ]; then
             do_test="true"
-        elif [ "x$arg" == "all" ]; then
+        elif [ "x$arg" == "xall" ]; then
             do_prep="true"
             do_build="true"
             do_test="true"
