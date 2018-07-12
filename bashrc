@@ -50,8 +50,17 @@ alias gic='grep --exclude=tags --exclude-dir=.git -nIHr'
 alias gif='grep --exclude=tags --exclude-dir=.git -iInHr'
 alias gff='find . -path "*.git*" -prune -o -print | grep -i'
 
+function vgff() {
+    local query="$1"
+    for file in $(find . -path "*.git*" -prune -o -print | grep -i "$query"); do
+        if [ -f "$file" ]; then
+            vi "$file"
+        fi
+    done
+}
+
 function gitc() {
-    local query=$1
+    local query="$1"
     grep -ro "$query" | wc -l
 }
 
