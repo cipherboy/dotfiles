@@ -101,3 +101,14 @@ function list_shared_ovals_multiplatform() {
         fi
     done
 }
+
+function pcd() {
+    local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
+    local new_product="$1"
+    local current_dir="$(pwd)"
+    local current_prod_path="${current_dir#$base_dir}"
+    current_prod_path="${current_prod_path#/}"
+    local new_path="$base_dir/$new_product/${current_prod_path#*/}"
+    pushd "$new_path"
+
+}
