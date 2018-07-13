@@ -89,3 +89,15 @@ function find_profiles() {
         fi
     done
 }
+
+function list_shared_ovals_multiplatform() {
+    local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
+    for _file in "$base_dir"/*/checks/oval/*.xml; do
+        local file="$(basename "$_file")"
+        local object="${file%.xml}"
+        local usages="$(grep -l " - $object$" "$base_dir"/*/profiles/*.profile | sed 's/\/profiles\/[^\.]*\.profile$//g' | sort -u | wc -l)"
+        if (( usages > 1 )); then
+            echo "$_file"
+        fi
+    done
+}
