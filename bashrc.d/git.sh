@@ -142,7 +142,7 @@ function ghr() {
     git checkout master
     git pull origin
     git checkout "$branch"
-    build prep build test
+    build all
 }
 
 function ghl() {
@@ -182,6 +182,7 @@ function gtpoffline() {
 }
 
 function gtponline() {
+    cp ~/.git_offline_push ~/.git_offline_push.original
     local line="$(head -n 1 ~/.git_offline_push)"
     while [ "x$line" != "x" ]; do
         pushd "$line"
@@ -223,4 +224,14 @@ function gtrsp() {
         git rebase --continue
         ret=$?
     done
+}
+
+function gtbac() {
+    local base="$1"
+    if [ "x$base" == "x" ]; then
+        base="--fork-point"
+    fi
+
+    git rebase "$base" --exec "bash -c 'source ~/.bashrc ; build all'"
+    return $?
 }
