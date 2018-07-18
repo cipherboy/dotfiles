@@ -17,7 +17,7 @@ eval "$(dircolors)"
 alias ls="ls --color=auto --group-directories-first"
 alias grep="grep --color=auto"
 
-export GOPATH="$HOME/Development/go/"
+export GOPATH="$HOME/Development/go"
 
 ## Common aliases
 # emacs alias to fix x-keypass
@@ -39,7 +39,7 @@ alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
 ## PS1
 PS1='[\u@\h \W]\$ '
 
-export PATH="/usr/lib64/ccache:$GOPATH/bin:$HOME/.rbenv/bin:/usr/local/go/bin:/opt/bin:/opt/node/bin:/usr/games/bin:$HOME/bin:/usr/local/racket/bin:$PATH"
+export PATH="/usr/lib64/ccache:/usr/games/bin:$HOME/bin:$PATH"
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 
