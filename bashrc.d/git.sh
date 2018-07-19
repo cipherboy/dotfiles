@@ -188,7 +188,7 @@ function gtponline() {
         pushd "$line"
         git push
         popd
-        head -n -1 ~/.git_offline_push > ~/.git_offline_push.tmp
+        tail -n -1 ~/.git_offline_push > ~/.git_offline_push.tmp
         mv ~/.git_offline_push.tmp ~/.git_offline_push
         line="$(head -n 1 ~/.git_offline_push)"
     done
