@@ -16,7 +16,6 @@ bind "set show-all-if-ambiguous on"
 # Keep all history
 shopt -s histappend
 shopt -s cmdhist
-PROMPT_COMMAND='history -a'
 HISTSIZE=-1
 HISTFILESIZE=-1
 HISTCONTROL="erasedups:ignoreboth"
