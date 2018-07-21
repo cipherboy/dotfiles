@@ -68,7 +68,7 @@ function build() {
         fi
     done
 
-    if [ "$do_clean" == "fales" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
+    if [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
         do_clean="true"
         do_prep="true"
         do_build="true"
