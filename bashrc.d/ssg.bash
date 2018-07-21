@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function s() {
     export rdir="$1"
     n

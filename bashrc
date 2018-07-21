@@ -8,16 +8,25 @@ if [ "$TILIX_ID" ] || [ "$VTE_VERSION" ]; then
         source /etc/profile.d/vte.sh
 fi
 
+# Shell Options
+shopt -s checkwinsize
+shopt -s globstar 2> /dev/null
+bind "set show-all-if-ambiguous on"
+
 # Keep all history
+shopt -s histappend
+shopt -s cmdhist
+PROMPT_COMMAND='history -a'
 HISTSIZE=-1
 HISTFILESIZE=-1
+HISTCONTROL="erasedups:ignoreboth"
+export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear"
+HISTTIMEFORMAT='%F %T '
 
 # Force pretty colors
 eval "$(dircolors)"
 alias ls="ls --color=auto --group-directories-first"
 alias grep="grep --color=auto"
-
-export GOPATH="$HOME/Development/go"
 
 ## Common aliases
 # emacs alias to fix x-keypass
@@ -27,27 +36,50 @@ alias emacs='GPG_AGENT_INFO="" emacs --display "" --no-window-system '
 alias yaudio='youtube-dl -x --audio-quality 0 --audio-format best -f bestaudio'
 alias yvideo='youtube-dl -x --audio-quality 0 --audio-format best -f best -k'
 
-# Convert to mp3
-alias ape2mp3='for a in *.ape; do ffmpeg -i "$a" -qscale:a 320k -b 320k "${a[@]/%ape/mp3}" && rm "$a"; done'
-alias flac2mp3='parallel avconv -i {} -qscale:a 320k -b 320k {.}.mp3 ::: *.flac'
-alias m4a2mp3='parallel avconv -i {} -qscale:a 320k -b 320k {.}.mp3 ::: *.m4a'
-alias wav2mp3='parallel avconv -i {} -qscale:a 320k -b 320k {.}.mp3 ::: *.wav'
-
 # Generate a new password
 alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
 
 ## PS1
 PS1='[\u@\h \W]\$ '
 
-export PATH="/usr/lib64/ccache:/usr/games/bin:$HOME/bin:$PATH"
+function __DEDUPE_PATH() {
+    local _old_path="${1//:/$'\n'}"
+    local _new_path=""
+
+    local _old_IFS="$IFS"
+    IFS=$'\n'
+
+    for _old_part in $_old_path; do
+        local _have_part="false"
+        for _new_part in ${_new_path//:/$'\n'}; do
+            if [ "x$_old_part" == "x$_new_part" ]; then
+                _have_part="true"
+                break
+            fi
+        done
+
+        if [ "$_have_part" == "false" ]; then
+            if [ "x$_new_path" == "x" ]; then
+                _new_path="$_old_part"
+            else
+                _new_path="$_new_path:$_old_part"
+            fi
+        fi
+    done
+
+    IFS="$_old_IFS"
+    echo "$_new_path"
+}
+
+export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:$PATH")"
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 
 
 # grep aliases
-alias gir='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iIr'
-alias gic='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -nIHr'
-alias gif='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iInHr'
+alias gir='grep --exclude=tags --exclude-dir=.git -iIr'
+alias gic='grep --exclude=tags --exclude-dir=.git -nIHr'
+alias gif='grep --exclude=tags --exclude-dir=.git -iInHr'
 alias gff='find . -path "*.git*" -prune -o -print | grep -i'
 
 function vgff() {
@@ -66,7 +98,6 @@ function gitc() {
 
 # project aliases
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
-alias pep8='python3-pep8 *.py'
 
 # Laptop aliases
 ldock() {
@@ -97,7 +128,7 @@ for script in $HOME/.bashrc.d/*.sh; do
     source "$script"
 done
 
-if [ ! -f "$HOME/.no_powerline" ] && [ -f `which powerline-daemon` ]; then
+if [ ! -f "$HOME/.no_powerline" ] && [ -f "$(which powerline-daemon)" ]; then
   powerline-daemon -q
   POWERLINE_BASH_CONTINUATION=1
   POWERLINE_BASH_SELECT=1
