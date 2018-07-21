@@ -7,6 +7,7 @@ function build() {
     local which_clang="$(which clang 2>/dev/null)"
     local which_clangpp="$(which clang++ 2>/dev/null)"
 
+    local do_clean="false"
     local do_prep="false"
     local do_build="false"
     local do_test="false"
@@ -25,15 +26,19 @@ function build() {
     local py3path="$(which python3 2>/dev/null)"
     local pypath="$py3path"
     local starting_dir="$(pwd 2>/dev/null)"
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
     for arg in "$@"; do
-        if [ "x$arg" == "xprep" ]; then
+        if [ "x$arg" == "xclean" ]; then
+            do_clean="true"
+        elif [ "x$arg" == "xprep" ]; then
             do_prep="true"
         elif [ "x$arg" == "xbuild" ]; then
             do_build="true"
         elif [ "x$arg" == "xtest" ]; then
             do_test="true"
         elif [ "x$arg" == "xall" ]; then
+            do_clean="true"
             do_prep="true"
             do_build="true"
             do_test="true"
@@ -63,7 +68,8 @@ function build() {
         fi
     done
 
-    if [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
+    if [ "$do_clean" == "fales" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
+        do_clean="true"
         do_prep="true"
         do_build="true"
     fi
@@ -96,13 +102,67 @@ function build() {
     cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
 
     function __build_cd() {
-        local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
         if [ "x$git_root" == "x" ]; then
             return
         fi
 
         if [ "x$starting_dir" != "x$git_root" ]; then
             cd "$git_root" || return
+        fi
+    }
+
+    function __build_info() {
+        echo "start dir: $starting_dir"
+        echo "git root: $git_root"
+        echo "cc path: $ccpath"
+        echo "cflags: $cflags"
+        echo "cxx path: $cxxpath"
+        echo "cxxflags: $cxxflags"
+        echo "python path: $pypath"
+        echo "do_clean: $do_clean"
+        echo "do_prep: $do_prep"
+        echo "do_build: $do_build"
+        echo "do_test: $do_test"
+    }
+
+    function __build_clean_cmake() {
+        local have_build_gitkeep=false
+        if [ -e "build/.gitkeep" ]; then
+            have_build_gitkeep=true
+        fi
+
+        (rm -rf build && mkdir -p build) || return 1
+        if [ $have_build_gitkeep ]; then
+            touch .gitkeep
+        fi
+    }
+
+    function __build_clean_make() {
+        make clean distclean
+        return $?
+    }
+
+    function __build_clean_python() {
+        $pypath setup.py clean || return $?
+        if [ -d "build" ]; then
+            rm -rf build
+        fi
+        return 0
+    }
+
+    function __build_clean() {
+        if [ -e "CMakeLists.txt" ]; then
+            __build_clean_cmake
+            return $?
+        elif [ -e "Makefile" ]; then
+            __build_clean_make
+            return $?
+        elif [ -e "setup.py" ]; then
+            __build_clean_python
+        elif [ -e "src" ]; then
+            cd src || return 1
+            __build_clean
+            return $?
         fi
     }
 
@@ -117,14 +177,8 @@ function build() {
     }
 
     function __build_prep_cmake() {
-        local have_build_gitkeep=false
-        if [ -e "build/.gitkeep" ]; then
-            have_build_gitkeep=true
-        fi
-
-        (rm -rf build && mkdir -p build && cd build) || return 1
-        if [ $have_build_gitkeep ]; then
-            touch .gitkeep
+        if [ -d "build" ]; then
+            cd build || return 1
         fi
 
         if [ "x$which_ninja" == "x" ]; then
@@ -139,10 +193,6 @@ function build() {
     }
 
     function __build_prep_autotools() {
-        if [ -e "Makefile" ]; then
-            make distclean
-        fi
-
         if [ ! -e "configure" ]; then
             time -p autoreconf -f -i
         fi
@@ -151,11 +201,8 @@ function build() {
     }
 
     function __build_prep_python_setuptools() {
-        if [ -d "build" ]; then
-            $pypath ./setup.py clean
-            rm -rf "build"
-        fi
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath ./setup.py check
+        $pypath -m pip install --user -r test-requirements.txt
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath setup.py check
         return $?
     }
 
@@ -190,7 +237,7 @@ function build() {
     }
 
     function __build_python() {
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath ./setup.py build
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath setup.py build
         return $?
     }
 
@@ -231,12 +278,20 @@ function build() {
         return $?
     }
 
+    function __build_test_python() {
+        time -p $pypath setup.py test
+        return $?
+    }
+
     function __build_test() {
         if [ -e "CMakeCache.txt" ]; then
             __build_test_ctest
             return $?
         elif [ -e "Makefile" ]; then
             __build_test_make
+            return $?
+        elif [ -e "setup.py" ]; then
+            __build_test_python
             return $?
         elif [ -d "build" ]; then
             cd build || return 1
@@ -261,6 +316,16 @@ function build() {
     }
 
     __build_cd
+    __build_info
+
+    if [ "$do_clean" == "true" ]; then
+        __build_clean
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "Clean failed with status: $ret"
+            return $ret
+        fi
+    fi
 
     if [ "$do_prep" == "true" ]; then
         __build_prep
