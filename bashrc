@@ -45,9 +45,9 @@ alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 
 
 # grep aliases
-alias gir='grep --exclude=tags --exclude-dir=.git -iIr'
-alias gic='grep --exclude=tags --exclude-dir=.git -nIHr'
-alias gif='grep --exclude=tags --exclude-dir=.git -iInHr'
+alias gir='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iIr'
+alias gic='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -nIHr'
+alias gif='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iInHr'
 alias gff='find . -path "*.git*" -prune -o -print | grep -i'
 
 function vgff() {
