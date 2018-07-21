@@ -159,11 +159,15 @@ function build() {
             return $?
         elif [ -e "setup.py" ]; then
             __build_clean_python
-        elif [ -e "src" ]; then
-            cd src || return 1
-            __build_clean
             return $?
+        elif [ -e "src" ]; then
+            pushd src || return 1
+            __build_clean
+            local ret=$?
+            popd
+            return $ret
         fi
+        return 0
     }
 
     function __build_prep_cmake_ninja() {
@@ -217,9 +221,11 @@ function build() {
             __build_prep_python_setuptools
             return $?
         elif [ -d "src" ]; then
-            cd src || return
+            pushd src || return
             __build_prep
-            return $?
+            local ret=$?
+            popd
+            return $ret
         else
             echo "Cannot build: unknown build system"
             return 1
@@ -255,13 +261,17 @@ function build() {
             __build_python
             return $?
         elif [ -d "build" ]; then
-            cd build || return 1
+            pushd build || return 1
             __build
-            return $?
+            local ret=$?
+            popd
+            return $ret
         elif [ -d "src" ]; then
-            cd src || return 1
+            pushd src || return 1
             __build
-            return $?
+            local ret=$?
+            popd
+            return $ret
         else
             echo "Unknown build system!"
             return 1
@@ -294,13 +304,17 @@ function build() {
             __build_test_python
             return $?
         elif [ -d "build" ]; then
-            cd build || return 1
+            pushd build || return 1
             __build_test
-            return $?
+            local ret=$?
+            popd
+            return $ret
         elif [ -d "src" ]; then
-            cd src || return 1
+            pushd src || return 1
             __build_test
-            return $?
+            local ret=$?
+            popd
+            return $ret
         else
             echo "Unknown test system!"
             return 1
