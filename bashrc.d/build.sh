@@ -133,7 +133,7 @@ function build() {
 
         (rm -rf build && mkdir -p build) || return 1
         if [ $have_build_gitkeep ]; then
-            touch .gitkeep
+            touch build/.gitkeep
         fi
     }
 
