@@ -92,6 +92,24 @@ function find_profiles() {
     done
 }
 
+function find_profile_rules() {
+    local profile="$1"
+    local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+    local profile_rules="$(grep '^    - ' "$profile" | sed 's/^    - //g' | sed 's/=.*$//g')"
+    for rule in $profile_rules; do
+        local found="$(find "$base_dir"/*/guide | grep "\\/$rule\\.")"
+        local found_count="$(find "$base_dir"/*/guide | grep "\\/$rule\\." | wc -l)"
+        if [ "x$found" == "x" ]; then
+            echo "$rule - NOTFOUND"
+        elif [ "x$found_count" != "x1" ]; then
+            echo "$rule - $found_count"
+        else
+            echo "$rule - $found"
+        fi
+    done
+}
+
 function list_shared_ovals_multiplatform() {
     local base_dir="$(git rev-parse --show-toplevel 2>/dev/null)"
     for _file in "$base_dir"/*/checks/oval/*.xml; do
@@ -112,5 +130,4 @@ function pcd() {
     current_prod_path="${current_prod_path#/}"
     local new_path="$base_dir/$new_product/${current_prod_path#*/}"
     pushd "$new_path"
-
 }
