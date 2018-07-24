@@ -79,11 +79,11 @@ alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 alias gir='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iIr'
 alias gic='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -nIHr'
 alias gif='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iInHr'
-alias gff='find . -path "*.git*" -prune -o -print | grep -i'
+alias gff="find . -path '*/build/*' -prune -o -print -path '*.git*' -prune -o -print | grep -i"
 
 function vgff() {
     local query="$1"
-    for file in $(find . -path "*.git*" -prune -o -print | grep -i "$query"); do
+    for file in $(find . -path '*/build/*' -prune -o -print -path '*.git*' -prune -o -print | grep -i "$query"); do
         if [ -f "$file" ]; then
             vi "$file"
         fi
