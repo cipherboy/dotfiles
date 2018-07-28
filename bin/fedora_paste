@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+
+"""
+Pastes to a Modern Paste (https://github.com/LINKIWI/modern-paste)
+API endpoint, and in particular, the Fedora Project's paste
+service (https://paste.fedoraproject.org).
+"""
+
+import sys
+import os.path
+import requests
+
+
+def main():
+    contents = ""
+
+    is_valid_path = len(sys.argv) == 2 and os.path.isfile(sys.argv[1])
+    if is_valid_path:
+        contents = open(sys.argv[1], 'r').read()
+    else:
+        contents = sys.stdin.read()
+
+    request_obj = {
+        "contents": contents,
+    }
+
+    response = requests.post('https://paste.fedoraproject.org/api/paste/submit',
+                             json=request_obj)
+
+    if response.status_code != 200:
+        print("Failed to create paste: %d" % response.status_code)
+        sys.exit(1)
+
+    response_obj = response.json()
+    if 'success' in response_obj and not response_obj['success']:
+        print("Failed to create paste: %s" % response_obj['failure_name'])
+        print("Error message: %s" % response_obj['message'])
+        sys.exit(1)
+
+    print(response_obj['url'])
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
