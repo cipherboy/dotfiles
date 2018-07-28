@@ -17,7 +17,7 @@ function build() {
     local cmake_args=""
     local make_args=""
     local ninja_args=""
-    local ctest_args=""
+    local ctest_args="--output-on-failure"
     local cflags="$CFLAGS"
     local cxxflags="$CXXFLAGS"
     local ccpath="$(which gcc 2>/dev/null)"
