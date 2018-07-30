@@ -6,6 +6,11 @@ function build() {
 
     local which_clang="$(which clang 2>/dev/null)"
     local which_clangpp="$(which clang++ 2>/dev/null)"
+    local which_afl_gcc="$(which afl-gcc 2>/dev/null)"
+    local which_afl_gpp="$(which afl-g++ 2>/dev/null)"
+    local which_afl_clang="$(which afl-clang 2>/dev/null)"
+    local which_afl_clangpp="$(which afl-clang++ 2>/dev/null)"
+    local which_afl_fuzz="$(which afl-fuzz 2>/dev/null)"
 
     local do_clean="false"
     local do_prep="false"
@@ -13,11 +18,12 @@ function build() {
     local do_test="false"
     local do_popd="true"
     local use_clang="false"
+    local use_afl="false"
     local use_parallel="true"
-    local cmake_args=""
-    local make_args=""
-    local ninja_args=""
-    local ctest_args="--output-on-failure"
+    local cmake_args="$BUILD_CMAKE_ARGS"
+    local make_args="$BUILD_MAKE_ARGS"
+    local ninja_args="$BUILD_NINJA_ARGS"
+    local ctest_args="$BUILD_CTEST_ARGS --output-on-failure"
     local cflags="$CFLAGS"
     local cxxflags="$CXXFLAGS"
     local ccpath="$(which gcc 2>/dev/null)"
@@ -65,6 +71,8 @@ function build() {
             pypath="$py3path"
         elif [ "x$arg" == "xnopop" ]; then
             do_popd="false"
+        elif [ "x$arg" == "xfuzz" ]; then
+            use_afl="true"
         fi
     done
 
@@ -74,15 +82,16 @@ function build() {
         do_build="true"
     fi
 
-    if [ $use_clang ] && [ "x$which_clang" == "x" ]; then
-        use_clang=false
-    fi
-
-    if [ "$use_clang" == "true" ]; then
-        if [ "x$which_clang" != "x" ]; then
+    # Set ccpath/cxxpath based on arguments provided
+    if [ "$use_afl" == "true" ] && [ "x$which_afl_fuzz" != "x" ] && [ "$use_clang" == "false" ]; then
+        ccpath="$which_afl_gcc"
+        cxxpath="$which_afl_gpp"
+    elif [ "$use_afl" == "true" ] && [ "x$which_afl_fuzz" != "x" ] && [ "$use_clang" == "true" ]; then
+        ccpath="$which_afl_clang"
+        cxxpath="$which_afl_clangpp"
+    elif [ "$use_clang" == "true" ]; then
+        if [ "x$which_clang" != "x" ] && [ "x$which_clangpp" != "x" ]; then
             ccpath="$which_clang"
-        fi
-        if [ "x$which_clangpp" != "x" ]; then
             cxxpath="$which_clangpp"
         fi
     fi
@@ -112,17 +121,18 @@ function build() {
     }
 
     function __build_info() {
-        echo "start dir: $starting_dir"
-        echo "git root: $git_root"
-        echo "cc path: $ccpath"
-        echo "cflags: $cflags"
-        echo "cxx path: $cxxpath"
-        echo "cxxflags: $cxxflags"
-        echo "python path: $pypath"
-        echo "do_clean: $do_clean"
-        echo "do_prep: $do_prep"
-        echo "do_build: $do_build"
-        echo "do_test: $do_test"
+        echo "args: ${@[*]}" 1>&2
+        echo "start dir: $starting_dir" 1>&2
+        echo "git root: $git_root" 1>&2
+        echo "cc path: $ccpath" 1>&2
+        echo "cflags: $cflags" 1>&2
+        echo "cxx path: $cxxpath" 1>&2
+        echo "cxxflags: $cxxflags" 1>&2
+        echo "python path: $pypath" 1>&2
+        echo "do_clean: $do_clean" 1>&2
+        echo "do_prep: $do_prep" 1>&2
+        echo "do_build: $do_build" 1>&2
+        echo "do_test: $do_test" 1>&2
     }
 
     function __build_clean_cmake() {
@@ -138,8 +148,9 @@ function build() {
     }
 
     function __build_clean_make() {
+        # Some Makefiles will fail on a cleaned repo
         make clean distclean
-        return $?
+        return 0
     }
 
     function __build_clean_python() {
