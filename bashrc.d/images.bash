@@ -48,7 +48,8 @@ function r50() {
         return 1
     fi
 
-    cp "$name" -rv "$name"_50
+    mkdir -p "$name"_50
+    cp "$name"/*.jpg -rv "$name"_50/
 
     pushd "$name"_50
         for file in *.jpg; do
