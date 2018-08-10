@@ -121,7 +121,6 @@ function build() {
     }
 
     function __build_info() {
-        echo "args: ${@[*]}" 1>&2
         echo "start dir: $starting_dir" 1>&2
         echo "git root: $git_root" 1>&2
         echo "cc path: $ccpath" 1>&2
