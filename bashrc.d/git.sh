@@ -4,7 +4,8 @@ alias gtb='git branch'
 alias gtc='git clone'
 function gtcd() {
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
-    pushd "$git_root"
+    pushd "$git_root" 1>/dev/null 2>&2
+    echo "$git_root"
 }
 alias gtcp='git cherry-pick'
 alias gtcpc='git cherry-pick --continue'
@@ -20,6 +21,7 @@ alias gtm='git commit -s'
 alias gtma='git commit -s --amend'
 alias gto='git checkout'
 alias gtob='git checkout -b'
+alias gtom='git checkout master'
 alias gtp='git push'
 alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
 alias gtr='git rebase'
@@ -68,12 +70,14 @@ function gtuf() {
     local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     git pull origin "$branch"
     git reset --hard "origin/$branch"
+    git status
 }
 
 function gtum() {
     local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     git checkout master && git pull && git pull origin master && git pull upstream master && git push
     git checkout "$branch"
+    git status
 }
 
 function gtub() {
@@ -81,6 +85,7 @@ function gtub() {
     local branch=$1
     git checkout "$branch" && git pull && git pull origin $branch && git pull upstream "$branch" && git push
     git checkout "$current"
+    git status
 }
 
 function ghcd() {
@@ -121,6 +126,8 @@ function ghcd() {
             pushd "$path"
         fi
     fi
+
+    git status
 }
 
 function ghr() {
@@ -142,6 +149,8 @@ function ghr() {
     git checkout master
     git pull origin
     git checkout "$branch"
+    git pull origin "$branch"
+    git reset --hard "origin/$branch"
     build all
 }
 
