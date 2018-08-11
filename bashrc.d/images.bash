@@ -2,6 +2,23 @@
 
 IMAGE_PREFIX="DSC_"
 
+function renum() {
+    local const="$1"
+    if [ "x$const" == "x" ]; then
+        const=1000
+    fi
+
+    for num in `seq 1 1000`; do
+        local nnum=$(( const + num ))
+        local pnum="$(pad "$num")"
+        local pnnum="$(pad "$nnum")"
+
+        if [ -e "$IMAGE_PREFIX$pnum.jpg" ]; then
+            mv "$IMAGE_PREFIX$pnum.jpg" "$IMAGE_PREFIX$pnnum.jpg"
+        fi
+    done
+}
+
 function ext() {
     rename JPG jpg *.JPG
     return $?
