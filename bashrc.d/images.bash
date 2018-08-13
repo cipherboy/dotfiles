@@ -39,6 +39,15 @@ function pad() {
     fi
 }
 
+function kpass() {
+    local num="$1"
+    mkdir "keep_pass_$num"
+    mkdir "keep_pass_$num"_50
+    rm keep keep_50
+    ln -s "keep_pass_$num" keep
+    ln -s "keep_pass_$num"_50 keep_50
+}
+
 function k() {
     local number="$(pad "$1")"
 
@@ -48,10 +57,12 @@ function k() {
     fi
 
     if [ ! -d "keep" ]; then
-        mkdir -p "keep"
+        echo "Refusing to work: directory keep does not exist" 1>&2
+        return 1
     fi
 
     cp "all/$IMAGE_PREFIX$number.jpg" -v "keep/$IMAGE_PREFIX$number.jpg"
+    cp "all_50/$IMAGE_PREFIX$number.jpg" -v "keep_50/$IMAGE_PREFIX$number.jpg"
 }
 
 function r50() {
