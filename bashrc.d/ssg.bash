@@ -131,3 +131,15 @@ function pcd() {
     local new_path="$base_dir/$new_product/${current_prod_path#*/}"
     pushd "$new_path"
 }
+
+function rrme() {
+    gtcd
+    gtum
+    gto reorganize-rules
+    gtrm
+    git clean -xdf
+    python3 ./utils/move_rules.py `pwd` > /tmp/rrme-script.sh
+    bash /tmp/rrme-script.sh
+    git add -A
+    git commit -m "Move everything"
+}
