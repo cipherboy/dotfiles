@@ -123,6 +123,8 @@ function load() {
     source "$HOME/.bashrc.d/$1.bash"
 }
 
+alias reload='source $HOME/.bashrc'
+
 for script in $HOME/.bashrc.d/*.sh; do
     source "$script"
 done
