@@ -181,10 +181,21 @@ function ghcd() {
     fi
 
     ghs
-    history -a
-    export HISTFILE="$path/.git/bash_history"
-    history -c; history -r
+    ghh
     git status
+}
+
+function ghh() {
+    # Enable git repository history sourcing.
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+    if [ "x$git_root" == "x" ]; then
+        return 0
+    fi
+
+    history -a
+    export HISTFILE="$git_root/.git/bash_history"
+    history -c; history -r
 }
 
 function ghs() {
@@ -347,3 +358,10 @@ function gtbac() {
     git rebase "$base" --exec "bash -c 'source ~/.bashrc ; build all'"
     return $?
 }
+
+
+### ALWAYS RUN FUNCTIONS ##
+
+# Always source pre-repo bash history if we're in a git directory
+ghh
+export PROMPT_COMMAND="ghh;$PROMPT_COMMAND"
