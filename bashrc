@@ -18,9 +18,8 @@ shopt -s histappend
 shopt -s cmdhist
 HISTSIZE=-1
 HISTFILESIZE=-1
-HISTCONTROL="erasedups:ignoreboth"
-export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear"
-HISTTIMEFORMAT='%F %T '
+HISTCONTROL="ignoredups:erasedups"
+export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 
 # Force pretty colors
 eval "$(dircolors)"

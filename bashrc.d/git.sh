@@ -162,7 +162,7 @@ function ghcd() {
     fi
 
     local path="$gitbase/$provider/$username/$repository"
-    if [ -d "$path" ]; then
+    if [ -d "$path/.git" ]; then
         pushd "$path"
     else
         path=""
@@ -173,12 +173,34 @@ function ghcd() {
             fi
         done
 
-        if [ "x$path" != "x" ] && [ -d "$path" ]; then
-            pushd "$path"
+        if [ "x$path" == "x" ] || [ ! -d "$path" ]; then
+            return 1
         fi
+
+        pushd "$path"
     fi
 
+    ghs
+    history -a
+    export HISTFILE="$path/.git/bash_history"
+    history -c; history -r
     git status
+}
+
+function ghs() {
+    # Stop using local history and switch back to global history, appending
+    # local history to the global history.
+
+    local old_hist="$HISTFILE"
+
+    history -a
+    export HISTFILE="$HOME/.bash_history"
+    history -c
+
+    cat "$HISTFILE" "$old_hist" | uniq >"$HISTFILE.tmp"
+    mv "$HISTFILE.tmp" "$HISTFILE"
+
+    history -r
 }
 
 function ghr() {
