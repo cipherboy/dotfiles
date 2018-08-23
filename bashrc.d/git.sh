@@ -1,6 +1,7 @@
 # git aliases
 alias gta='git add'
 alias gtb='git branch'
+alias gtbn='basename `gtcd`'
 alias gtc='git clone'
 function gtcd() {
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
