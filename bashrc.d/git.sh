@@ -186,30 +186,63 @@ function ghcd() {
 }
 
 function ghh() {
-    # Enable git repository history sourcing.
-    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    # Source the local git repository
 
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
     if [ "x$git_root" == "x" ]; then
-        return 0
+        ghs
+        return
     fi
 
+    local new_histfile="$git_root/.git/bash_history"
+    local old_histfile="$HISTFILE"
+
+    if [ "x$new_histfile" == "x$old_histfile" ]; then
+        return
+    fi
+
+    # Since we're changing histories, save and merge the old history
+    ghs
+
     history -a
-    export HISTFILE="$git_root/.git/bash_history"
-    history -c; history -r
+    export HISTFILE="$new_histfile"
+
+    # If history file doesnt exist, seed it first with the global history.
+    if [ ! -e "$new_histfile" ]; then
+        cp "$HOME/.bash_history" "$new_histfile"
+        echo "## GLOBAL_BASH_HISTORY_MARKER ##" >> "$new_histfile"
+    fi
+
+    history -c
+    history -r
 }
 
 function ghs() {
     # Stop using local history and switch back to global history, appending
     # local history to the global history.
 
-    local old_hist="$HISTFILE"
+    local old_histfile="$HISTFILE"
+    local home_histfile="$HOME/.bash_history"
+
+    if [ "x$old_histfile" == "x$home_histfile" ]; then
+        return
+    fi
 
     history -a
-    export HISTFILE="$HOME/.bash_history"
+    export HISTFILE="$home_histfile"
     history -c
 
-    cat "$HISTFILE" "$old_hist" | uniq >"$HISTFILE.tmp"
-    mv "$HISTFILE.tmp" "$HISTFILE"
+    grep -o GLOBAL_BASH_HISTORY_MARKER < "$old_histfile" >/dev/null 2>/dev/null
+    local ret=$?
+    if (( ret == 0 )); then
+        sed -e '1,/GLOBAL_BASH_HISTORY_MARKER/d' "$old_histfile" > "$old_histfile.tmp"
+        cat "$home_histfile" "$old_histfile.tmp" | uniq > "$home_histfile.tmp"
+        rm -f "$old_histfile.tmp"
+    else
+        cat "$home_histfile" "$old_histfile" | uniq > "$home_histfile.tmp"
+    fi
+
+    mv "$home_histfile.tmp" "$home_histfile"
 
     history -r
 }
@@ -363,5 +396,4 @@ function gtbac() {
 ### ALWAYS RUN FUNCTIONS ##
 
 # Always source pre-repo bash history if we're in a git directory
-ghh
 export PROMPT_COMMAND="ghh;$PROMPT_COMMAND"
