@@ -13,6 +13,7 @@ function __do_update() {
     local do_update_abcde="false"
     local do_update_git="false"
     local do_update_tlp="false"
+    local do_update_ccache="false"
 
     for arg in "$@"; do
         if [ "x$arg" == "xall" ]; then
@@ -23,6 +24,7 @@ function __do_update() {
             do_update_abcde="true"
             do_update_git="true"
             do_update_tlp="true"
+            do_update_ccache="true"
         elif [ "x$arg" == "xbash" ]; then
             do_update_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
@@ -37,6 +39,8 @@ function __do_update() {
             do_update_agents="true"
         elif [ "x$arg" == "xtlp" ]; then
             do_update_tlp="true"
+        elif [ "x$arg" == "xccache" ]; then
+            do_update_ccache="true"
         fi
     done
 
@@ -73,6 +77,11 @@ function __do_update() {
     if [ "$do_update_tlp" == "true" ]; then
         echo "Updating tlp..."
         cp -v /etc/default/tlp tlp
+    fi
+
+    if [ "$do_update_ccache" == "true" ]; then
+        echo "Updating ccache..."
+        cp -v "$HOME/.ccache/ccache.conf" ccache.conf
     fi
 
 }

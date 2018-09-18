@@ -13,6 +13,7 @@ function __do_install() {
     local do_install_abcde="false"
     local do_install_git="false"
     local do_install_tlp="false"
+    local do_install_ccache="false"
 
     for arg in "$@"; do
         if [ "x$arg" == "xall" ]; then
@@ -23,6 +24,7 @@ function __do_install() {
             do_install_abcde="true"
             do_install_git="true"
             do_install_tlp="true"
+            do_install_ccache="true"
         elif [ "x$arg" == "xbash" ]; then
             do_install_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
@@ -37,6 +39,8 @@ function __do_install() {
             do_install_agents="true"
         elif [ "x$arg" == "xtlp" ]; then
             do_install_tlp="true"
+        elif [ "x$arg" == "xccache" ]; then
+            do_install_ccache="true"
         fi
     done
 
@@ -71,6 +75,12 @@ function __do_install() {
     if [ "$do_install_tlp" == "true" ]; then
         echo "Installing tlp..."
         cp -v tlp /etc/default/tlp
+    fi
+
+    if [ "$do_install_ccache" == "true" ]; then
+        echo "Installing ccache..."
+        mkdir -p -v "$HOME/.ccahe"
+        cp -v ccache.conf "$HOME/.ccache/ccache.conf"
     fi
 
     if [ "$do_install_agents" == "true" ]; then
