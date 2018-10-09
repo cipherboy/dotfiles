@@ -187,6 +187,7 @@ function ghcd() {
 
 function ghh() {
     # Source the local git repository
+    return
 
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
     if [ "x$git_root" == "x" ]; then
@@ -220,6 +221,7 @@ function ghh() {
 function ghs() {
     # Stop using local history and switch back to global history, appending
     # local history to the global history.
+    return
 
     local old_histfile="$HISTFILE"
     local home_histfile="$HOME/.bash_history"
