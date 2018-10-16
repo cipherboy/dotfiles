@@ -21,6 +21,18 @@ HISTFILESIZE=-1
 HISTCONTROL="ignoredups:erasedups"
 export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 
+# Vim helpers
+export VISUAL=vim
+export EDITOR="$VISUAL"
+export GIT_EDITOR="$EDITOR"
+function vimnpw() {
+    sed 's/^" \(autocmd BufWritePre\)/\1/g' ~/.vimrc -i
+}
+function vimpw() {
+    sed 's/^\(autocmd BufWritePre\)/" \1/g' ~/.vimrc -i
+}
+
+
 # Force pretty colors
 eval "$(dircolors)"
 alias ls="ls --color=auto --group-directories-first"
