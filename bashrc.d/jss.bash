@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function rebuild_docs() {
-    local remote="https://github.com/cipherboy/jss-javadoc"
+    local remote="https://github.com/cipherboy/jss"
     local upstream="https://github.com/dogtagpki/jss"
 
     # Setup sandbox with dependencies
@@ -18,9 +18,11 @@ function rebuild_docs() {
     (make javadoc && git clean -xdf) || return 6
 
     # Updates gh-pages with javadocs
-    git checkout "gh-pages" || return 7
-    (rm -rf "javadoc" && cp "../dist/jssdoc" "javadoc" -rv) || return 8
-    (git add --all && git commit -m "Update javadocs from master at $(date '+%Y-%m-%d %H:%M')" && git push) || return 9
+    git checkout "upstream/gh-pages" || return 7
+    git branch -D "gh-pages"
+    git checkout -b "gh-pages" || return 9
+    (rm -rf "javadoc" && cp "../dist/jssdoc" "javadoc" -rv) || return 10
+    (git add --all && git commit -m "Update javadocs from master at $(date '+%Y-%m-%d %H:%M')" && git push --set-upstream origin gh-pages --force) || return 11
     popd
     rm -rf "$sandbox"
 }
