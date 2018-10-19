@@ -12,6 +12,8 @@ set expandtab
 set completeopt-=preview
 autocmd BufWritePre * %s/\s\+$//e
 
+:set directory=$HOME/.vim/swapfiles//
+:set backupdir=$HOME/.vim/swapfiles//
+
 " set colorcolumn=79
 " hi ColorColumn ctermbg=lightgrey guibg=lightgrey
-
