@@ -21,3 +21,14 @@ function sirc() {
 
 # vim
 alias v="vim"
+
+# podman
+
+function cr() {
+    local version="$1"
+    if [ "x$version" = "x" ]; then
+        version="fedora:rawhide"
+    fi
+
+    podman run -ti "$version" /bin/bash
+}
