@@ -1,7 +1,8 @@
 #!/bin/bash
 
 function rebuild_docs() {
-    local remote="https://github.com/cipherboy/jss"
+    local user="cipherboy"
+    local remote="https://github.com/$user/jss"
     local upstream="https://github.com/dogtagpki/jss"
 
     # Setup sandbox with dependencies
@@ -25,4 +26,9 @@ function rebuild_docs() {
     (git add --all && git commit -m "Update javadocs from master at $(date '+%Y-%m-%d %H:%M')" && git push --set-upstream origin gh-pages --force) || return 11
     popd
     rm -rf "$sandbox"
+
+    echo ""
+    echo ""
+    echo "All done! To open a PR, click the following link:"
+    echo "https://github.com/dogtagpki/jss/compare/gh-pages...$user:gh-pages"
 }
