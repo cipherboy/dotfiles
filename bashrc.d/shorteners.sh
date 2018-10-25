@@ -6,6 +6,7 @@ alias p3="python3"
 
 # SSH
 alias sr7="ssh recon7"
+alias sr7m="ssh recon7 -t 'screen -r -d media'"
 alias sr7r="ssh recon7r"
 alias pr7="sftp recon7"
 alias pr7r="sftp recon7r"
