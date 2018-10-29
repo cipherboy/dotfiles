@@ -33,3 +33,12 @@ function cr() {
 
     podman run -ti "$version" /bin/bash
 }
+
+function crc() {
+    local version="$1"
+    if [ "x$version" = "x" ]; then
+        version="fedora:rawhide"
+    fi
+
+    cr "cipherboy_$version"
+}
