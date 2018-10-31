@@ -242,8 +242,11 @@ function build() {
             local ret=$?
             popd
             return $ret
+        elif [ -e "Makefile" ]; then
+            # If there is already a Makefile, try running it :)
+            return 0
         else
-            echo "Cannot build: unknown build system"
+            echo "Cannot build prep: unknown build system"
             return 1
         fi
     }
@@ -299,9 +302,35 @@ function build() {
         return $?
     }
 
-    function __build_test_make() {
+    function __build_test_make_check() {
         time -p make check
         return $?
+    }
+
+    function __build_test_make_test() {
+        time -p make test
+        return $?
+    }
+
+    function __build_test_make() {
+        make -q check
+        check_ret=$?
+
+        make -q test
+        test_ret=$?
+
+        echo "$check_ret $test_ret"
+
+        if [[ $check_ret == 1 ]]; then
+            __build_test_make_check
+            return $?
+        elif [[ $test_ret == 1 ]]; then
+            __build_test_make_test
+            return $?
+        else
+            echo "Unknown make system! Targets 'test' and 'check' missing."
+            return 1
+        fi
     }
 
     function __build_test_python() {
