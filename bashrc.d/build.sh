@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function build() {
     local which_ninja="$(which ninja 2>/dev/null)"
     if [ "x$which_ninja" == "x" ]; then
@@ -16,6 +18,7 @@ function build() {
     local do_prep="false"
     local do_build="false"
     local do_test="false"
+    local do_rpm="false"
     local do_popd="true"
     local use_clang="false"
     local use_afl="false"
@@ -73,10 +76,12 @@ function build() {
             do_popd="false"
         elif [ "x$arg" == "xfuzz" ]; then
             use_afl="true"
+        elif [ "x$arg" == "xrpm" ]; then
+            do_rpm="true"
         fi
     done
 
-    if [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ]; then
+    if [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ]; then
         do_clean="true"
         do_prep="true"
         do_build="true"
@@ -132,6 +137,7 @@ function build() {
         echo "do_prep: $do_prep" 1>&2
         echo "do_build: $do_build" 1>&2
         echo "do_test: $do_test" 1>&2
+        echo "do_rpm: $do_rpm" 1>&2
     }
 
     function __build_clean_cmake() {
@@ -331,6 +337,20 @@ function build() {
         fi
     }
 
+    function __build_rpm_script() {
+        time -p ./build.sh --with-timestamp --with-commit-id
+    }
+
+    function __build_rpm() {
+        if [ -e "build.sh" ]; then
+            __build_rpm_script
+            return $?
+        else
+            echo "Unknown rpm system!"
+            return 1
+        fi
+    }
+
     function __build_uncd() {
         local cpwd="$(pwd 2>/dev/null)"
 
@@ -374,6 +394,15 @@ function build() {
         ret="$?"
         if (( ret != 0 )); then
             echo "Test failed with status: $ret"
+            return $ret
+        fi
+    fi
+
+    if [ "$do_rpm" == "true" ]; then
+        __build_rpm
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "RPM failed with status: $ret"
             return $ret
         fi
     fi
