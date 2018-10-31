@@ -14,6 +14,7 @@ function build() {
     local which_afl_clangpp="$(which afl-clang++ 2>/dev/null)"
     local which_afl_fuzz="$(which afl-fuzz 2>/dev/null)"
 
+    local do_env="false"
     local do_clean="false"
     local do_prep="false"
     local do_build="false"
@@ -38,7 +39,9 @@ function build() {
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
     for arg in "$@"; do
-        if [ "x$arg" == "xclean" ]; then
+        if [ "x$arg" == "xenv" ]; then
+            do_env="true"
+        elif [ "x$arg" == "xclean" ]; then
             do_clean="true"
         elif [ "x$arg" == "xprep" ]; then
             do_prep="true"
@@ -47,6 +50,7 @@ function build() {
         elif [ "x$arg" == "xtest" ]; then
             do_test="true"
         elif [ "x$arg" == "xall" ]; then
+            do_env="true"
             do_clean="true"
             do_prep="true"
             do_build="true"
@@ -81,7 +85,8 @@ function build() {
         fi
     done
 
-    if [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ]; then
+    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ]; then
+        do_env="true"
         do_clean="true"
         do_prep="true"
         do_build="true"
@@ -133,11 +138,26 @@ function build() {
         echo "cxx path: $cxxpath" 1>&2
         echo "cxxflags: $cxxflags" 1>&2
         echo "python path: $pypath" 1>&2
+        echo "do_env: $do_env" 1>&2
         echo "do_clean: $do_clean" 1>&2
         echo "do_prep: $do_prep" 1>&2
         echo "do_build: $do_build" 1>&2
         echo "do_test: $do_test" 1>&2
         echo "do_rpm: $do_rpm" 1>&2
+    }
+
+    function __build_env_jss() {
+        if [ "x$JAVA_HOME" == "x" ]; then
+            source tools/autoenv.sh
+            return $?
+        fi
+    }
+
+    function __build_env() {
+        if [ -e "tools/autoenv.sh" ]; then
+            __build_env_jss
+            return $?
+        fi
     }
 
     function __build_clean_cmake() {
@@ -390,6 +410,15 @@ function build() {
 
     __build_cd
     __build_info
+
+    if [ "$do_env" == "true" ]; then
+        __build_env
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "Environment failed with status: $ret"
+            return $ret
+        fi
+    fi
 
     if [ "$do_clean" == "true" ]; then
         __build_clean
