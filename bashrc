@@ -25,10 +25,10 @@ export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 export VISUAL=vim
 export EDITOR="$VISUAL"
 export GIT_EDITOR="$EDITOR"
-function vimnpw() {
+function vnpw() {
     sed 's/^" \(autocmd BufWritePre\)/\1/g' ~/.vimrc -i
 }
-function vimpw() {
+function vpw() {
     sed 's/^\(autocmd BufWritePre\)/" \1/g' ~/.vimrc -i
 }
 
@@ -81,7 +81,7 @@ function __DEDUPE_PATH() {
     echo "$_new_path"
 }
 
-export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:$PATH")"
+export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$PATH")"
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 

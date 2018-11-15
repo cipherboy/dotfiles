@@ -22,6 +22,7 @@ function sirc() {
 
 # vim
 alias v="vim"
+alias r="vim -R"
 
 # podman
 
@@ -41,4 +42,45 @@ function crc() {
     fi
 
     cr "cipherboy_$version"
+}
+
+# Ansible
+
+alias ap='ansible-playbook'
+alias aph='ansible-playbook -i hosts'
+
+function rte() {
+    local role="$1"
+    local path="roles/$role/tasks/main.yml"
+    local bn="$(basename "$(pwd)")"
+
+    if [ ! -e "$path" ] && [ -e "$role/tasks/main.yml" ]; then
+        path="$role/tasks/main.yml"
+    elif [ ! -e "$path" ] && [ "x$role" == "x$bn" ]; then
+        path="tasks/main.yml"
+    fi
+
+    if [ ! -e "$path" ]; then
+        echo "Unable to find tasks/main.yml for $role" 1>&2
+        return 1
+    fi
+    "$EDITOR" "$path"
+}
+
+function rve() {
+    local role="$1"
+    local path="roles/$role/vars/main.yml"
+    local bn="$(basename "$(pwd)")"
+
+    if [ ! -e "$path" ] && [ -e "$role/vars/main.yml" ]; then
+        path="$role/vars/main.yml"
+    elif [ ! -e "$path" ] && [ "x$role" == "x$bn" ]; then
+        path="vars/main.yml"
+    fi
+
+    if [ ! -e "$path" ]; then
+        echo "Unable to find vars/main.yml for $role" 1>&2
+        return 1
+    fi
+    "$EDITOR" "$path"
 }
