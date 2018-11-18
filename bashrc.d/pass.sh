@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# This is useful for when the user arrives via sudo with left over environment
+# variables floating around.
 _cur_tty="$(tty)"
-if [ "x$GPG_TTY" != "x$_cur_tty" ]; then
+if [ "x$GPG_TTY" != "x" ] && [ "x$GPG_TTY" != "x$_cur_tty" ]; then
     # Sanity check: validate tty is owned by user, else reset it to `tty`.
     gpg_tty_owner="$(stat --format '%U' "$GPG_TTY")"
     if [ "x$gpg_tty_owner" != "x$USER" ]; then
