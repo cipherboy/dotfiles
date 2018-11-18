@@ -1,5 +1,14 @@
 #!/bin/bash
 
+_cur_tty="$(tty)"
+if [ "x$GPG_TTY" != "x$_cur_tty" ]; then
+    # Sanity check: validate tty is owned by user, else reset it to `tty`.
+    gpg_tty_owner="$(stat --format '%U' "$GPG_TTY")"
+    if [ "x$gpg_tty_owner" != "x$USER" ]; then
+        export GPG_TTY="$_cur_tty"
+    fi
+fi
+
 function upd() {
     local subfolder="$1"
     pass init -p "$subfolder" "$(cat ~/.password-store/.gpg-id)"
