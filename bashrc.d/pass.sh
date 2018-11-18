@@ -22,7 +22,7 @@ function ups() {
 
 function upc() {
     local account="$1"
-    pass show -c 1 "$account"
+    pass show -c1 "$account"
 }
 
 alias upl="pass ls"
