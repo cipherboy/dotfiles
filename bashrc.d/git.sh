@@ -398,4 +398,4 @@ function gtbac() {
 ### ALWAYS RUN FUNCTIONS ##
 
 # Always source pre-repo bash history if we're in a git directory
-export PROMPT_COMMAND="ghh;$PROMPT_COMMAND"
+#export PROMPT_COMMAND="ghh;$PROMPT_COMMAND"
