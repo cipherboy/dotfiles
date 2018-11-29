@@ -32,3 +32,84 @@ function rebuild_docs() {
     echo "All done! To open a PR, click the following link:"
     echo "https://github.com/dogtagpki/jss/compare/gh-pages...$user:gh-pages"
 }
+
+function frs1() {(
+    set -e
+
+    local tag="$1"
+    local base_dir="$HOME/releases/jss/$tag"
+
+    rm -rf "$base_dir"
+    mkdir -p "$base_dir/upstream" 2>/dev/null
+    cd "$base_dir/upstream"
+
+    pwd
+    wget "https://github.com/dogtagpki/jss/archive/$tag.tar.gz"
+    tar -xf "$tag.tar.gz"
+
+    cd "$base_dir"
+    git clone "ssh://cipherboy@pkgs.fedoraproject.org/forks/cipherboy/rpms/jss.git"
+    cd jss
+    git checkout -b "$tag"
+    meld jss.spec ../upstream/*/jss.spec
+)}
+
+function frs2() {(
+    set -e
+
+    local tag="$1"
+    local base_dir="$HOME/releases/jss/$tag"
+    local work_dir="$base_dir/build"
+
+    cd "$base_dir"/upstream
+    pwd
+
+    rm -rf "$base_dir/upstream/jss"
+    git clone https://github.com/dogtagpki/jss && cd jss
+    git checkout "$tag"
+    ./build.sh --source-tag="$tag" --work-dir="$work_dir" src
+
+    cd "$base_dir/jss"
+    fedpkg new-sources "$work_dir"/SOURCES/jss*.tar.gz
+)}
+
+function frs3() {(
+    set -e
+
+    source /etc/os-release
+
+    local tag="$1"
+    local base_dir="$HOME/releases/jss/$tag"
+    local work_dir="$base_dir/build"
+
+    cd "$base_dir/jss"
+
+    fedpkg --release="f$VERSION_ID" local
+
+    git add .gitignore
+    git add jss.spec
+    git add sources
+
+    git commit -s -m "Rebased to JSS $tag"
+
+    fedpkg copr-build @pki/10.6 --nowait
+
+    echo "When this finishes, pick the changes into release branches."
+)}
+
+function frs4() {(
+    set -e
+
+    local tag="$1"
+    local branch="$2"
+    local base_dir="$HOME/releases/jss/$tag"
+
+    rm -rf "$base_dir/downstream"
+    mkdir -p "$base_dir/downstream"
+    cd "$base_dir/downstream"
+    pwd
+
+    git clone https://src.fedoraproject.org/rpms/jss && cd jss
+    git checkout "$branch"
+    fedpkg build --nowait
+)}
