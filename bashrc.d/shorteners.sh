@@ -84,3 +84,20 @@ function rve() {
     fi
     "$EDITOR" "$path"
 }
+
+# Temporary directories
+
+function tcd() {
+    local num="$1"
+    if [ "x$num" == "x" ]; then
+        for i in `seq 1 1000`; do
+            if [ ! -d "$HOME/tmp/$i" ]; then
+                num="$i"
+                break
+            fi
+        done
+    fi
+
+    mkdir -p "$HOME/tmp/$num" 2>/dev/null
+    pushd "$HOME/tmp/$num"
+}
