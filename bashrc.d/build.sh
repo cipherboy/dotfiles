@@ -138,6 +138,10 @@ function build() {
         echo "cxx path: $cxxpath" 1>&2
         echo "cxxflags: $cxxflags" 1>&2
         echo "python path: $pypath" 1>&2
+        echo "cmake args: $cmake_args"
+        echo "make args: $make_args"
+        echo "ninja args: $ninja_args"
+        echo "ctest args: $ctest_args"
         echo "do_env: $do_env" 1>&2
         echo "do_clean: $do_clean" 1>&2
         echo "do_prep: $do_prep" 1>&2
