@@ -12,53 +12,77 @@ function v() {
     shopt -s extglob
     shopt -s globstar
 
+    function __v_compute_git_index() {
+        local git_root="$1"
+        local index_location="$git_root/.git/v-git-document-index"
+
+        if [ "x$git_root" == "x" ]; then
+            return 1
+        fi
+
+        if [ -e "$index_location" ]; then
+            local modified="$(stat --format=%Y "$index_location")"
+            local current_time="$(date +%s)"
+            local difference=$(( current_time - modified ))
+
+            # If the file is older than 15 minutes out of date, regenerate it
+            if (( difference <= 900 )); then
+                return 0
+            fi
+        fi
+
+        echo "Generating file index at $index_location" 1>&2
+        find "$git_root" | sed '/\(\/.git\/\|\.git[a-z]*$\)/d' > $index_location
+    }
+
     function __v_find_file() {
         local raw_candidate="$1"
         local candidate="$(echo "$raw_candidate" | sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g')"
         local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
-        local glob="$(ls */"$candidate" 2>/dev/null | wc -l)"
-        local glob_star="$(ls **/"$candidate" 2>/dev/null | wc -l)"
-        local glob_fuzzy="$(ls */*"$candidate"* 2>/dev/null | wc -l)"
-        local glob_star_fuzzy="$(ls **/*"$candidate"* 2>/dev/null | wc -l)"
-
-        local git_glob="$(ls "$git_root"/*/"$candidate" 2>/dev/null | wc -l)"
-        local git_glob_star="$(ls "$git_root"/**/"$candidate" 2>/dev/null | wc -l)"
-        local git_glob_fuzzy="$(ls "$git_root"/*/*"$candidate"* 2>/dev/null | wc -l)"
-        local git_glob_star_fuzzy="$(ls "$git_root"/**/*"$candidate"* 2>/dev/null | wc -l)"
-
         if [ -e "$candidate" ]; then
             echo "$candidate"
             return 0
-        elif [ -e "../$candidate" ]; then
+        fi
+        if [ -e "../$candidate" ]; then
             echo "../$candidate"
             return 0
-        elif [ -e "$git_root/$candidate" ]; then
+        fi
+        if [ "x$git_root" != "x" ] &&  [ -e "$git_root/$candidate" ]; then
             echo "$git_root/$candidate"
             return 0
-        elif [ $glob == 1 ]; then
-            echo */"$candidate"
+        fi
+
+        # Fast options don't exist. Let's try a few other options before
+        # giving up...
+        if [ "x$git_root" != "x" ]; then
+            # Compute and store an index of files in the git root. This allows
+            # us to find a file in the git root, but not recompute this index
+            # every time.
+
+            __v_compute_git_index "$git_root"
+            local index_location="$git_root/.git/v-git-document-index"
+            local result_count="$(cat "$index_location" | grep -F "$candidate" | wc -l)"
+            local result="$(cat "$index_location" | grep -F "$candidate")"
+
+            # Note that we have to validate that the file exists before we try
+            # to edit it -- sometimes the index is out of date and a file has
+            # been recently removed.
+            if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
+                echo "$result"
+                return 0
+            fi
+        fi
+
+        local glob="$(ls */"$candidate" 2>/dev/null | wc -l)"
+        if [ "x$glob" == "x1" ]; then
+            ls */"$candidate"
             return 0
-        elif [ $glob_star == 1 ]; then
-            echo **/"$candidate"
-            return
-        elif [ $glob_fuzzy == 1 ]; then
-            echo */*"$candidate"*
-            return 0
-        elif [ $glob_star_fuzzy == 1 ]; then
-            echo **/*"$candidate"*
-            return 0
-        elif [ $git_glob == 1 ]; then
-            echo "$git_root"/*/"$candidate"
-            return 0
-        elif [ $git_glob_star == 1 ]; then
-            echo "$git_root"/**/"$candidate"
-            return
-        elif [ $git_glob_fuzzy == 1 ]; then
-            echo "$git_root"/*/*"$candidate"*
-            return 0
-        elif [ $git_glob_star_fuzzy == 1 ]; then
-            echo "$git_root"/**/*"$candidate"*
+        fi
+
+        local glob_fuzzy="$(ls */*"$candidate"* 2>/dev/null | wc -l)"
+        if [ "x$glob" == "x1" ]; then
+            ls */"$candidate"
             return 0
         fi
 
@@ -139,7 +163,7 @@ function v() {
 
         __do_update_vimrc "$file"
 
-        echo vim "${editor_args[@]}" $line "$file"
+        echo vim "${editor_args[@]}" $line "$file" 1>&2
         vim "${editor_args[@]}" $line "$file"
         ret=$?
         if [ $ret != 0 ]; then
