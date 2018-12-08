@@ -21,8 +21,7 @@ function sirc() {
 }
 
 # vim
-alias v="vim"
-alias r="vim -R"
+alias r="v -R"
 
 # podman
 
