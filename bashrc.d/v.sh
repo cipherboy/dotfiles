@@ -67,12 +67,20 @@ function v() {
 
             __v_compute_git_index "$git_root"
             local index_location="$git_root/.git/v-git-document-index"
-            local result_count="$(cat "$index_location" | grep -F "$candidate" | wc -l)"
             local result="$(cat "$index_location" | grep -F "$candidate")"
+            local result_count="$(echo "$result" | wc -l)"
 
             # Note that we have to validate that the file exists before we try
             # to edit it -- sometimes the index is out of date and a file has
             # been recently removed.
+            if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
+                echo "$result"
+                return 0
+            fi
+
+            # Try again with regex matching...
+            result="$(cat "$index_location" | grep "$candidate")"
+            result_count="$(echo "$result" | wc -l)"
             if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
                 echo "$result"
                 return 0
