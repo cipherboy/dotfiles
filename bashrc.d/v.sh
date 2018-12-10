@@ -32,7 +32,12 @@ function v() {
         fi
 
         echo "Generating file index at $index_location" 1>&2
-        find "$git_root" | sed '/\(\/.git\/\|\.git[a-z]*$\)/d' > $index_location
+
+        # Ignore the contents of .git and build directories.
+        find "$git_root" |
+            sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
+            sed '/\/build\//d' |
+            cat - > $index_location
     }
 
     function __v_find_file() {
@@ -151,6 +156,7 @@ function v() {
 
     # If we have no known files, edit the arguments anyways
     if [ $max_seq == 0 ]; then
+        echo vim "${editor_args[@]}" 1>&2
         vim "${editor_args[@]}"
         return $?
     fi
