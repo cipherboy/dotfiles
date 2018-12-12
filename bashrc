@@ -101,6 +101,13 @@ function vgff() {
     done
 }
 
+function vgif() {
+    v $(gif "$@" | grep -o '^[^:]*:[0-9]*:')
+}
+function vgic() {
+    v $(gic "$@" | grep -o '^[^:]*:[0-9]*:')
+}
+
 function gitc() {
     local query="$1"
     grep -ro "$query" | wc -l
