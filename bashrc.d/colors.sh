@@ -15,3 +15,13 @@ function ls_color() {
     unset key
     unset LS_COLORS_ARRAY
 }
+
+function ecode() {
+    for arg in "$@"; do
+        if [ "x$arg" != "xreset" ]; then
+            echo "\e[${arg}m"
+        else
+            echo "\e[0m"
+        fi
+    done
+}
