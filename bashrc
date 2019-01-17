@@ -50,7 +50,13 @@ alias yvideo='youtube-dl -x --audio-quality 0 --audio-format best -f best -k'
 alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
 
 ## PS1
-PS1='[\u@\h \W]\$ '
+hat='🎩︎'
+
+if grep -q 'redhat.com' /etc/resolv.conf; then
+PS1="[\\u@\\h\\[\\e[31m\\]$hat\\[\\e[0m\\] \\W]\\$ "
+else
+PS1="[\\u@\\h \\W]\\$ "
+fi
 
 function __DEDUPE_PATH() {
     local _old_path="${1//:/$'\n'}"
