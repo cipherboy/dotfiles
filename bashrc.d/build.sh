@@ -391,7 +391,7 @@ function build() {
     }
 
     function __build_rpm_script() {
-        time -p ./build.sh --with-timestamp --with-commit-id
+        time -p ./build.sh --with-timestamp --with-commit-id rpm
     }
 
     function __build_rpm() {
