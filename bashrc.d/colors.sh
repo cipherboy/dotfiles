@@ -25,3 +25,9 @@ function ecode() {
         fi
     done
 }
+
+function ecolor() {
+    echo -n -e "$(ecode "$(ls_color "$1")")"
+    cat -
+    echo -n -e "$(ecode "$(ls_color rs)")"
+}
