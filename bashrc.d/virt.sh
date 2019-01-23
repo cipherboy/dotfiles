@@ -11,9 +11,16 @@ function vm_addrs() {
 function vssh() {
     local name="$(vm_list | grep "$1" | awk '{print $2}')"
     local lines="$(wc -l <<< "$name")"
+
     if (( lines != 1 )); then
-        echo "$name"
-        return 1
+        local exact="$(grep "^$1$" <<< "$name")"
+
+        if [ "x$exact" == "x" ]; then
+            echo "$name"
+            return 1
+        fi
+
+        name="$1"
     fi
 
     local addr="$(vm_addrs "$name" | grep -o '192.168.122.[0-9]*' | head -n 1)"
