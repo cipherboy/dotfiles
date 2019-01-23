@@ -27,6 +27,7 @@ else
     HISTSIZE=999999999
     HISTFILESIZE=999999999
 fi
+
 HISTCONTROL="ignoredups:erasedups"
 export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 
@@ -60,11 +61,10 @@ alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
 
 ## PS1
 hat='🎩︎'
-
 if grep -q 'redhat.com' /etc/resolv.conf; then
-PS1="[\\u@\\h\\[\\e[31m\\]$hat\\[\\e[0m\\] \\W]\\$ "
+    PS1="[\\u@\\h\\[\\e[31m\\]$hat\\[\\e[0m\\] \\W]\\$ "
 else
-PS1="[\\u@\\h \\W]\\$ "
+    PS1="[\\u@\\h \\W]\\$ "
 fi
 
 function __DEDUPE_PATH() {
@@ -119,6 +119,9 @@ function vgff() {
 function vgif() {
     v $(gif "$@" | grep -o '^[^:]*:[0-9]*:')
 }
+function vfgif() {
+    v $(gif "$@" | grep -o '^[^:]*:[0-9]*:' | grep -o '^[^:]*' | sort -u)
+}
 function vgic() {
     v $(gic "$@" | grep -o '^[^:]*:[0-9]*:')
 }
@@ -153,7 +156,31 @@ upload() {
 }
 
 function load() {
-    source "$HOME/.bashrc.d/$1.bash"
+    local rcdir="$HOME/.bashrc.d"
+
+    if (( $# == 0 )); then
+        echo "Usage: load <module>"
+        echo ""
+
+        echo "Bash modules:"
+        ls "$rcdir" | grep '\.bash$' | sed 's/\.bash$//g' | ecolor 'so'
+        echo ""
+
+        echo "Shell modules:"
+        ls "$rcdir" | grep '\.sh$' | sed 's/\.sh$//g' | ecolor 'so'
+
+        return 0
+    fi
+
+    local base="$rcdir/$1"
+
+    if [ -e "$base.bash" ]; then
+        source "$base.bash"
+    elif [ -e "$base.sh" ]; then
+        source "$base.sh"
+    else
+        source "$base"
+    fi
 }
 
 alias reload='source $HOME/.bashrc'
