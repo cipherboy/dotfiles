@@ -9,9 +9,10 @@ function vm_addrs() {
 }
 
 function vssh() {
-    local name="$(vm_list | grep "$1" | awk '{print $2}')"
+    local name="$(vm_list | grep -i "$1" | awk '{print $2}')"
     local lines="$(wc -l <<< "$name")"
 
+    # When we have more than one line, check if our name is an exact match
     if (( lines != 1 )); then
         local exact="$(grep "^$1$" <<< "$name")"
 
@@ -20,6 +21,7 @@ function vssh() {
             return 1
         fi
 
+        # Exact match; keep it.
         name="$1"
     fi
 
@@ -30,6 +32,11 @@ function vssh() {
         user="root"
     fi
 
+    local command="$3"
+    if [ "x$command" == "x" ]; then
+        command="ssh"
+    fi
+
     ssh-copy-id "$user"@"$addr"
-    ssh "$user"@"$addr"
+    #command "$user"@"$addr"
 }
