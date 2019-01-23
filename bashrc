@@ -1,11 +1,15 @@
 #!/bin/bash
 
+if [ -e /etc/profile ]; then
+    source /etc/profile
+fi
+
 for i in /etc/profile.d/*.sh; do
-	source $i
+    source $i
 done
 
 if [ "$TILIX_ID" ] || [ "$VTE_VERSION" ]; then
-        source /etc/profile.d/vte.sh
+    source /etc/profile.d/vte.sh
 fi
 
 # Shell Options
@@ -16,8 +20,13 @@ bind "set show-all-if-ambiguous on"
 # Keep all history
 shopt -s histappend
 shopt -s cmdhist
-HISTSIZE=-1
-HISTFILESIZE=-1
+if (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3 ) )); then
+    HISTSIZE=-1
+    HISTFILESIZE=-1
+else
+    HISTSIZE=999999999
+    HISTFILESIZE=999999999
+fi
 HISTCONTROL="ignoredups:erasedups"
 export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 
