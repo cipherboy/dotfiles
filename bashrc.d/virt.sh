@@ -38,5 +38,5 @@ function vssh() {
     fi
 
     ssh-copy-id "$user"@"$addr"
-    #command "$user"@"$addr"
+    $command "$user"@"$addr"
 }
