@@ -34,7 +34,7 @@ function v() {
         echo "Generating file index at $index_location" 1>&2
 
         # Ignore the contents of .git and build directories.
-        find "$git_root" |
+        git ls-files |
             sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
             sed '/\/build\//d' |
             cat - > $index_location
