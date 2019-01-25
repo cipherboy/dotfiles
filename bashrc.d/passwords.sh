@@ -65,7 +65,7 @@ function genpass() {
             last_format="$char"
             last_count=$(( last_count + 1 ))
         else
-            if (( last_count >= 0 )) && [ "x$char" != "x$last_format" ]; then
+            if (( last_count >= 0 )); then
                 password="$password$(__genpassphrase_special "$last_format" $last_count)"
                 last_format=""
                 last_count=0
@@ -75,7 +75,7 @@ function genpass() {
         fi
     done
 
-    if (( last_count >= 0 )) && [ "x$char" != "x$last_format" ]; then
+    if (( last_count >= 0 )); then
         password="$password$(__genpassphrase_special "$last_format" $last_count)"
         last_format=""
         last_count=0
