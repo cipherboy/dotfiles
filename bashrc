@@ -56,9 +56,6 @@ alias emacs='GPG_AGENT_INFO="" emacs --display "" --no-window-system '
 alias yaudio='youtube-dl -x --audio-quality 0 --audio-format best -f bestaudio'
 alias yvideo='youtube-dl -x --audio-quality 0 --audio-format best -f best -k'
 
-# Generate a new password
-alias genpass="tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1"
-
 ## PS1
 hat='🎩︎'
 if grep -q 'redhat.com' /etc/resolv.conf; then
