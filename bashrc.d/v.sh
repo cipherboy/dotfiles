@@ -25,8 +25,8 @@ function v() {
             local current_time="$(date +%s)"
             local difference=$(( current_time - modified ))
 
-            # If the file is older than 15 minutes out of date, regenerate it
-            if (( difference <= 900 )); then
+            # If the file is older than 5 minutes out of date, regenerate it
+            if (( difference <= 300 )); then
                 return 0
             fi
         fi
@@ -34,7 +34,7 @@ function v() {
         echo "Generating file index at $index_location" 1>&2
 
         # Ignore the contents of .git and build directories.
-        git ls-files |
+        find "$git_root" -type f |
             sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
             sed '/\/build\//d' |
             cat - > $index_location
