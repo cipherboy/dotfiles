@@ -12,8 +12,10 @@ function v() {
     shopt -s extglob
     shopt -s globstar
 
+    local reload=false
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+
     function __v_compute_git_index() {
-        local git_root="$1"
         local index_location="$git_root/.git/v-git-document-index"
 
         if [ "x$git_root" == "x" ]; then
@@ -26,7 +28,7 @@ function v() {
             local difference=$(( current_time - modified ))
 
             # If the file is older than 5 minutes out of date, regenerate it
-            if (( difference <= 300 )); then
+            if [ "$reload" == "false" ] && (( difference <= 300 )); then
                 return 0
             fi
         fi
@@ -37,13 +39,13 @@ function v() {
         find "$git_root" -type f |
             sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
             sed '/\/build\//d' |
+            sed '/\/__pycache__\//d' |
             cat - > $index_location
     }
 
     function __v_find_file() {
         local raw_candidate="$1"
         local candidate="$(echo "$raw_candidate" | sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g')"
-        local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
         if [ -e "$candidate" ]; then
             echo "$candidate"
@@ -148,7 +150,9 @@ function v() {
         line="$(__v_line_num "$arg")"
         line_ret=$?
 
-        if [ $path_ret == 0 ]; then
+        if [ "x$arg" == "x--reload" ] ; then
+            reload="true"
+        elif [ $path_ret == 0 ]; then
             editor_files+=("$path")
             if [ $line_ret == 0 ]; then
                 editor_lines+=("+$line")
