@@ -113,3 +113,21 @@ function frs4() {(
     git checkout "$branch"
     fedpkg build --nowait
 )}
+
+function add_patch() {(
+    set -e
+
+    local branch="$1"
+    local patch="$2"
+
+    gtob "$branch"
+
+    cp "$patch" .
+    meld jss.spec ~/GitHub/cipherboy/jss/jss.spec
+    vi jss.spec
+
+    fedpkg --release f30 local
+
+    gta *.spec *.patch
+    gtm -m "Add $patch to JSS build"
+)}
