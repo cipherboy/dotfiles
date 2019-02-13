@@ -23,3 +23,9 @@ function gh_pr_commits() {
 
     return 0
 }
+
+function gh_keys() {
+    local user="$1"
+
+    curl "https://api.github.com/users/$user/keys" 2>/dev/null | jq -r '.[].key' | sed "s/\$/ github-$user/g"
+}
