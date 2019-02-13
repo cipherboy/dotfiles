@@ -148,7 +148,7 @@ upload() {
     extension="${img##*.}"
     rimg="$RANDOM-$RANDOM.$extension"
     echo "$img->$rimg"
-    scp "$img" "cipherboy:/home/website/cipherboy-website/i/$rimg"
+    scp "$img" "cipherboy:/home/website/cipherboy.com/i/$rimg"
     echo "https://cipherboy.com/i/$rimg"
 }
 
