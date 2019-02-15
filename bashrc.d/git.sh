@@ -401,6 +401,10 @@ function gtbac() {
     return $?
 }
 
+function gtrbf() {
+    local branch="$(git rev-parse --abbrev-ref HEAD)"
+    gtom && gtum && gto "$branch" && gtrm && gtom && gtrb "$branch" && gtp && gto "$branch"
+}
 
 ### ALWAYS RUN FUNCTIONS ##
 
