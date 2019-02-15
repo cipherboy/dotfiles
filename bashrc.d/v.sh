@@ -86,6 +86,9 @@ function v() {
             if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
                 echo "$result"
                 return 0
+            elif (( result_count > 1 )); then
+                cat "$index_location" | grep "$candidate" >&2
+                return 2
             fi
         fi
 
@@ -149,6 +152,10 @@ function v() {
         path_ret=$?
         line="$(__v_line_num "$arg")"
         line_ret=$?
+
+        if (( path_ret == 2 )); then
+            return 0
+        fi
 
         if [ "x$arg" == "x--reload" ] ; then
             reload="true"
