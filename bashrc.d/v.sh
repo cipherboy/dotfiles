@@ -15,6 +15,12 @@ function v() {
     local reload=false
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
+    function find_filter() {
+        sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
+        sed '/\/build\//d' |
+        sed '/\/__pycache__\//d'
+    }
+
     function __v_compute_git_index() {
         local index_location="$git_root/.git/v-git-document-index"
 
@@ -36,28 +42,37 @@ function v() {
         echo "Generating file index at $index_location" 1>&2
 
         # Ignore the contents of .git and build directories.
-        find "$git_root" -type f |
-            sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
-            sed '/\/build\//d' |
-            sed '/\/__pycache__\//d' |
-            cat - > $index_location
+        find "$git_root" -type f 2>/dev/null |
+            find_filter > "$index_location"
     }
 
     function __v_find_file() {
         local raw_candidate="$1"
         local candidate="$(echo "$raw_candidate" | sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g')"
 
-        if [ -e "$candidate" ]; then
+        if [ -e "$candidate" ] && [ ! -d "$candidate" ]; then
             echo "$candidate"
             return 0
         fi
-        if [ -e "../$candidate" ]; then
+
+        if [ -e "../$candidate" ] && [ ! -d "../$candidate" ]; then
             echo "../$candidate"
             return 0
         fi
-        if [ "x$git_root" != "x" ] &&  [ -e "$git_root/$candidate" ]; then
+
+        if [ "x$git_root" != "x" ] &&  [ -e "$git_root/$candidate" ] && [ ! -d "$git_root/$candidate" ]; then
             echo "$git_root/$candidate"
             return 0
+        fi
+
+        local find="$(find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i "$candidate")"
+        local find_count="$(wc -l <<< "$find")"
+        if (( find_count == 1 )) && [ -e "$find" ]; then
+            echo "$find"
+            return 0
+        elif (( find_count > 1 )); then
+            find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i "$candidate" 1>&2
+            return 2
         fi
 
         # Fast options don't exist. Let's try a few other options before
@@ -69,24 +84,24 @@ function v() {
 
             __v_compute_git_index "$git_root"
             local index_location="$git_root/.git/v-git-document-index"
-            local result="$(cat "$index_location" | grep -F "$candidate")"
-            local result_count="$(echo "$result" | wc -l)"
+            local index="$(cat "$index_location" | grep -F "$candidate")"
+            local index_count="$(wc -l <<< "$index")"
 
             # Note that we have to validate that the file exists before we try
             # to edit it -- sometimes the index is out of date and a file has
             # been recently removed.
-            if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
-                echo "$result"
+            if (( index_count == 1 )) && [ -e "$index" ]; then
+                echo "$index"
                 return 0
             fi
 
             # Try again with regex matching...
-            result="$(cat "$index_location" | grep "$candidate")"
-            result_count="$(echo "$result" | wc -l)"
-            if [ "x$result_count" == "x1" ] && [ -e "$result" ]; then
-                echo "$result"
+            index="$(cat "$index_location" | grep "$candidate")"
+            index_count="$(echo "$index" | wc -l)"
+            if [ "x$index_count" == "x1" ] && [ -e "$index" ]; then
+                echo "$index"
                 return 0
-            elif (( result_count > 1 )); then
+            elif (( index_count > 1 )); then
                 cat "$index_location" | grep "$candidate" >&2
                 return 2
             fi
