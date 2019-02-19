@@ -8,7 +8,7 @@
 #     it does.
 #   - Detecting if a path is relative to the root of a git repo.
 #   - Sequentially edits multiple files at once.
-function v() {
+function v() {(
     shopt -s extglob
     shopt -s globstar
 
@@ -216,4 +216,4 @@ function v() {
 
         sleep 0.5
     done
-}
+)}
