@@ -146,6 +146,16 @@ function v() {(
         sed 's/^" \(autocmd BufWritePre\)/\1/g' ~/.vimrc -i
     }
 
+    function __use_tabs() {
+        sed 's/^set expandtab/set noexpandtab/g' ~/.vimrc -i
+        sed 's/^\(set softtabstop\)/" \1/g' ~/.vimrc -i
+    }
+
+    function __use_spaces() {
+        sed 's/^set noexpandtab/set expandtab/g' ~/.vimrc -i
+        sed 's/^" \(set softtabstop\)/\1/g' ~/.vimrc -i
+    }
+
     function __do_update_vimrc() {
         local file="$1"
         grep -q '[[:space:]]$' "$file"
@@ -155,6 +165,14 @@ function v() {(
             __preserve_whitespace
         else
             __no_preserve_whitespace
+        fi
+
+        local count_spaces="$(grep -c '^ ' "$file" 2>/dev/null)"
+        local count_tabs="$(grep -c '^	' "$file" 2>/dev/null)"
+        if (( count_spaces > count_tabs )); then
+            __use_spaces
+        elif (( count_tabs > count_spaces )); then
+            __use_tabs
         fi
     }
 
