@@ -38,3 +38,13 @@ function mplay() {
 
     $player "$@"
 }
+
+function mmount() {
+    mkdir -p "$HOME/rmusic"
+
+    if ssh recon7 exit 0 2>/dev/null >/dev/null; then
+        sshfs recon7:/media/large/Music "$HOME/rmusic"
+    else
+        sshfs recon7r:/media/large/Music "$HOME/rmusic"
+    fi
+}
