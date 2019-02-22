@@ -1,6 +1,7 @@
 # git aliases
 alias gta='git add'
 alias gtb='git branch'
+alias gtbc='git branch --contains'
 alias gtbn='basename "$(gtcd)"'
 alias gtc='git clone'
 function gtcd() {
