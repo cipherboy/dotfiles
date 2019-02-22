@@ -20,11 +20,15 @@ function sirc() {
     ssh "chat@$host" -t 'screen -r -d'
 }
 
+# Screen
+alias slist='screen -list'
+alias srd='screen -r -d'
+alias sS='screen -S'
+
 # vim
 alias r="v -R"
 
 # podman
-
 function cr() {
     local version="$1"
     if [ "x$version" = "x" ]; then
@@ -44,7 +48,6 @@ function crc() {
 }
 
 # Ansible
-
 alias ap='ansible-playbook'
 alias aph='ansible-playbook -i hosts'
 
@@ -85,7 +88,6 @@ function rve() {
 }
 
 # Temporary directories
-
 function tcd() {
     local num="$1"
     if [ "x$num" == "x" ]; then
