@@ -8,13 +8,16 @@ function vm_addrs() {
     sudo virsh domifaddr --full "$1"
 }
 
-function vssh() {
-    local name="$(vm_list | grep -i "$1" | awk '{print $2}')"
+function vssh_addr() {
+    local search="$1"
+    shift
+
+    local name="$(vm_list | grep -i "$search" | awk '{print $2}')"
     local lines="$(wc -l <<< "$name")"
 
     # When we have more than one line, check if our name is an exact match
     if (( lines != 1 )); then
-        local exact="$(grep "^$1$" <<< "$name")"
+        local exact="$(grep "^$search$" <<< "$name")"
 
         if [ "x$exact" == "x" ]; then
             echo "$name"
@@ -26,18 +29,91 @@ function vssh() {
     fi
 
     local addr="$(vm_addrs "$name" | grep -o '192.168.122.[0-9]*' | head -n 1)"
+    echo "$addr"
+    return 0
+}
 
+function vssh() {
+    local search="$1"
+    shift
+
+    local addr=""
+    addr="$(vssh_addr "$search")"
+    ret=$?
+
+    if (( ret != 0 )); then
+        echo "$addr"
+        return 1
+    fi
+
+    local user="root"
+    local remainder=()
+
+    while (( $# > 0 )); do
+        local arg="$1"
+        shift
+
+        if [ "x$arg" == "x-l" ]; then
+            user="$1"
+            shift
+        else
+            remainder+=("$arg")
+        fi
+    done
+
+    echo ssh "$user"@"$addr" "${remainder[@]}"
+    ssh "$user"@"$addr" "${remainder[@]}"
+}
+
+function vsftp() {
+    local search="$1"
+    shift
+
+    local addr=""
+    addr="$(vssh_addr "$search")"
+    ret=$?
+
+    if (( ret != 0 )); then
+        echo "$addr"
+        return 1
+    fi
+
+    local user="root"
+    local remainder=()
+
+    while (( $# > 0 )); do
+        local arg="$1"
+        shift
+
+        if [ "x$arg" == "x-l" ]; then
+            user="$1"
+            shift
+        else
+            remainder+=("$arg")
+        fi
+    done
+
+    echo sftp "$user"@"$addr" "${remainder[@]}"
+    sftp "$user"@"$addr" "${remainder[@]}"
+}
+
+function vsci() {
+    local search="$1"
     local user="$2"
+
     if [ "x$user" == "x" ]; then
         user="root"
     fi
 
-    local command="$3"
-    if [ "x$command" == "x" ]; then
-        command="ssh"
+    local addr=""
+    addr="$(vssh_addr "$search")"
+    ret=$?
+
+    if (( ret != 0 )); then
+        echo "$addr"
+        return 1
     fi
 
-    # ssh-copy-id "$user"@"$addr"
-    echo ssh "$user"@"$addr"
-    ssh "$user"@"$addr"
+    echo ssh-copy-id "$user"@"$addr"
+    ssh-copy-id "$user"@"$addr"
 }
