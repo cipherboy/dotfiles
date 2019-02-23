@@ -14,6 +14,7 @@ function ffind() {
     local seen_basename="false"
 
     local use_stdin="false"
+    local allow_hidden="false"
 
     while (( $# > 0 )); do
         local arg="$1"
@@ -48,6 +49,8 @@ function ffind() {
             find_type="-type f"
         elif [ "x$arg" == "x--stdin" ]; then
             use_stdin="true"
+        elif [ "x$arg" == "x--hidden" ]; then
+            allow_hidden="true"
         elif [ "x$arg" == "x--basename" ]; then
             basename="$1"
             shift
@@ -85,7 +88,9 @@ function ffind() {
         for result in "${results[@]}"; do
             line="${result#$base_dir}"
             if [ "x$line" != "x" ]; then
-                new_results+=("$line")
+                if [ "$allow_hidden" == "true" ] || [[ "/$line" != *"/."* ]]; then
+                    new_results+=("$line")
+                fi
             fi
         done
 
