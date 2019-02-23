@@ -71,7 +71,7 @@ function ffind() {
     fi
 
     if [ "$use_stdin" == "false" ]; then
-        mapfile -t results < <(find "$dir" -mindepth "$max_depth" -maxdepth "$max_depth" $find_type)
+        mapfile -t results < <(find "$dir" -mindepth "$min_depth" -maxdepth "$max_depth" $find_type)
     else
         mapfile -t results < <(cat -)
     fi
