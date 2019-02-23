@@ -169,28 +169,37 @@ function ghcd() {
         repository="$4"
     fi
 
-    local path="$gitbase/$provider/$username/$repository"
-    if [ -d "$path/.git" ]; then
-        pushd "$path"
-    else
-        path=""
-        for d in "$gitbase"/"$provider"/*/"$repository"; do
-            if [ -d "$d/.git" ]; then
-                path="$d"
-                break
-            fi
-        done
-
-        if [ "x$path" == "x" ] || [ ! -d "$path" ]; then
-            return 1
-        fi
-
-        pushd "$path"
+    local base="$gitbase/$provider"
+    local path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs --basename "$repository" "$username" "$repository")"
+    if [ -d "$base/$path/.git" ]; then
+        pushd "$base/$path"
+        git status
+        return 0
     fi
 
-    ghs
-    ghh
-    git status
+    path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs --basename "$repository" "$repository")"
+    if [ -d "$base/$path/.git" ]; then
+        pushd "$base/$path"
+        git status
+        return 0
+    fi
+
+    path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs "$username" "$repository")"
+    if [ -d "$base/$path/.git" ]; then
+        pushd "$base/$path"
+        git status
+        return 0
+    fi
+
+    path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs "$repository")"
+    if [ -d "$base/$path/.git" ]; then
+        pushd "$base/$path"
+        git status
+        return 0
+    fi
+
+
+    return 1
 }
 
 function ghh() {
