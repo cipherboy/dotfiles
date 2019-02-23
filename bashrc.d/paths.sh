@@ -13,6 +13,8 @@ function ffind() {
     local basename=""
     local seen_basename="false"
 
+    local use_stdin="false"
+
     while (( $# > 0 )); do
         local arg="$1"
         shift
@@ -44,6 +46,8 @@ function ffind() {
         elif [ "x$arg" == "x--only-files" ] || [ "x$arg" == "x--files" ] ||
                 [ "x$arg" == "x-f" ]; then
             find_type="-type f"
+        elif [ "x$arg" == "x--stdin" ]; then
+            use_stdin="true"
         elif [ "x$arg" == "x--basename" ]; then
             basename="$1"
             shift
@@ -66,8 +70,11 @@ function ffind() {
         fi
     fi
 
-     mapfile -t results < <(find "$dir" -mindepth "$max_depth" -maxdepth "$max_depth" $find_type)
-
+    if [ "$use_stdin" == "false" ]; then
+        mapfile -t results < <(find "$dir" -mindepth "$max_depth" -maxdepth "$max_depth" $find_type)
+    else
+        mapfile -t results < <(cat -)
+    fi
 
     if (( ${#results[@]} == 0 )); then
         return 1
