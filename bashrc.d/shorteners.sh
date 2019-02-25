@@ -48,8 +48,28 @@ function crc() {
 }
 
 # Ansible
-alias ap='ansible-playbook'
-alias aph='ansible-playbook -i hosts'
+function ap() {
+    local name="$1"
+    shift
+    local ret=0
+
+    name="$(ffind --files --depth 1 yml "$name")"
+    ret=$?
+    if (( ret != 0 )); then
+        echo "$name"
+        return $ret
+    fi
+
+    echo ansible-playbook "$name" "$@"
+    ansible-playbook "$name" "$@"
+}
+
+function aph() {
+    local name="$1"
+    shift
+
+    ap "$name" -i hosts "$@"
+}
 
 function rte() {
     local role="$1"
