@@ -1,7 +1,10 @@
 # git aliases
 alias gta='git add'
 alias gtb='git branch'
-alias gtbc='git branch --contains'
+function gtbc() {
+    local commit="$1"
+    git branch --all --contains "$commit" | sed 's#/# #g' | awk '{print $NF}' | sort -u
+}
 alias gtbn='basename "$(gtcd)"'
 alias gtc='git clone'
 function gtcd() {
@@ -368,7 +371,7 @@ function gtse() {
     local email="$1"
     if [ "x$email" == "xwork" ] || [ "x$email" == "xw" ]; then
         email="$(cat ~/.git_email_work)"
-    elif [ "x$email" == "personal" ] || [ "x$email" == "xp" ]; then
+    elif [ "x$email" == "xpersonal" ] || [ "x$email" == "xp" ]; then
         email="$(cat ~/.git_email_personal)"
     fi
     git config user.email "$email"
