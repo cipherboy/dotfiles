@@ -120,6 +120,10 @@ function build() {
 
     cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
 
+    if [ "$do_test" == "true" ]; then
+        cmake_args="$cmake_args -DENABLE_TESTING=ON"
+    fi
+
     function __build_cd() {
         if [ "x$git_root" == "x" ]; then
             return
