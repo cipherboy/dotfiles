@@ -1,18 +1,18 @@
 #!/bin/bash
 
 function build() {
-    local which_ninja="$(which ninja 2>/dev/null)"
+    local which_ninja="$(command -v ninja 2>/dev/null)"
     if [ "x$which_ninja" == "x" ]; then
-        which_ninja="$(which ninja-build 2>/dev/null)"
+        which_ninja="$(command -v ninja-build 2>/dev/null)"
     fi
 
-    local which_clang="$(which clang 2>/dev/null)"
-    local which_clangpp="$(which clang++ 2>/dev/null)"
-    local which_afl_gcc="$(which afl-gcc 2>/dev/null)"
-    local which_afl_gpp="$(which afl-g++ 2>/dev/null)"
-    local which_afl_clang="$(which afl-clang 2>/dev/null)"
-    local which_afl_clangpp="$(which afl-clang++ 2>/dev/null)"
-    local which_afl_fuzz="$(which afl-fuzz 2>/dev/null)"
+    local which_clang="$(command -v clang 2>/dev/null)"
+    local which_clangpp="$(command -v clang++ 2>/dev/null)"
+    local which_afl_gcc="$(command -v afl-gcc 2>/dev/null)"
+    local which_afl_gpp="$(command -v afl-g++ 2>/dev/null)"
+    local which_afl_clang="$(command -v afl-clang 2>/dev/null)"
+    local which_afl_clangpp="$(command -v afl-clang++ 2>/dev/null)"
+    local which_afl_fuzz="$(command -v afl-fuzz 2>/dev/null)"
 
     local do_env="false"
     local do_clean="false"
@@ -24,19 +24,29 @@ function build() {
     local use_clang="false"
     local use_afl="false"
     local use_parallel="true"
-    local cmake_args="$BUILD_CMAKE_ARGS"
-    local make_args="$BUILD_MAKE_ARGS"
-    local ninja_args="$BUILD_NINJA_ARGS"
-    local ctest_args="$BUILD_CTEST_ARGS --output-on-failure"
+    local cmake_args=()
+    local make_args=()
+    local ninja_args=()
+    local ctest_args=("$BUILD_CTEST_ARGS" "--output-on-failure")
     local cflags="$CFLAGS"
     local cxxflags="$CXXFLAGS"
-    local ccpath="$(which gcc 2>/dev/null)"
-    local cxxpath="$(which g++ 2>/dev/null)"
-    local py2path="$(which python2 2>/dev/null)"
-    local py3path="$(which python3 2>/dev/null)"
+    local ccpath="$(command -v gcc 2>/dev/null)"
+    local cxxpath="$(command -v g++ 2>/dev/null)"
+    local py2path="$(command -v python2 2>/dev/null)"
+    local py3path="$(command -v python3 2>/dev/null)"
     local pypath="$py3path"
     local starting_dir="$(pwd 2>/dev/null)"
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+    if (( ${#BUILD_CMAKE_ARGS[@]} > 0 )); then
+        cmake_args=("${BUILD_CMAKE_ARGS[@]}")
+    fi
+    if (( ${#BUILD_MAKE_ARGS[@]} > 0 )); then
+        make_args=("${BUILD_MAKE_ARGS[@]}")
+    fi
+    if (( ${#BUILD_NINJA_ARGS[@]} > 0 )); then
+        ninja_args=("${BUILD_NINJA_ARGS[@]}")
+    fi
 
     for arg in "$@"; do
         if [ "x$arg" == "xenv" ]; then
@@ -58,14 +68,14 @@ function build() {
         elif [ "x$arg" == "xclang" ]; then
             use_clang="true"
         elif [ "x$arg" == "xdebug" ]; then
-            cmake_args="$cmake_args -DCMAKE_BUILD_TYPE=Debug"
-            ctest_args="$ctest_args --debug"
+            cmake_args+=("-DCMAKE_BUILD_TYPE=Debug")
+            ctest_args+=("--debug")
             cflags="$cflags -Og -ggdb"
             cxxflags="$cxxflags -Og -ggdb"
         elif [ "x$arg" == "xoptimized" ]; then
             cflags="$cflags -O3"
             cxxflags="$cxxflags -O3"
-        elif [ "x$args" == "xwarnings" ]; then
+        elif [ "x$arg" == "xwarnings" ]; then
             cflags="$cflags -Wall -Wextra -Werror"
             cxxflags="$cxxflags -Wall -Wextra -Werror"
         elif [ "x$arg" == "xmake" ]; then
@@ -109,19 +119,23 @@ function build() {
     if [ "$use_parallel" == "true" ]; then
         local num_cores="$(grep -c '^processor[[:space:]]*:' < /proc/cpuinfo)"
         num_cores=$(( num_cores + 2 ))
-        make_args="$make_args -j $num_cores"
-        ninja_args="$ninja_args -j $num_cores"
-        ctest_args="$ctest_args -j $num_cores"
+        make_args+=("-j" "$num_cores")
+        ninja_args+=("-j" "$num_cores")
+        ctest_args+=("-j" "$num_cores")
     else
-        make_args="$make_args -j 1"
-        ninja_args="$ninja_args -j 1"
-        ctest_args="$ctest_args -j 1"
+        make_args+=("-j" "1")
+        ninja_args+=("-j" "1")
+        ctest_args+=("-j" "1")
     fi
 
-    cmake_args="$cmake_args -DCMAKE_C_COMPILER=$ccpath -DCMAKE_CXX_COMPILER=$cxxpath -DPYTHON_EXECUTABLE=$pypath -DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
+    cmake_args+=("-DCMAKE_C_COMPILER=$ccpath"
+        "-DCMAKE_CXX_COMPILER=$cxxpath"
+        "-DPYTHON_EXECUTABLE=$pypath"
+        "-DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
+    )
 
     if [ "$do_test" == "true" ]; then
-        cmake_args="$cmake_args -DENABLE_TESTING=ON"
+        cmake_args+=("-DENABLE_TESTING=ON")
     fi
 
     function __build_cd() {
@@ -142,10 +156,10 @@ function build() {
         echo "cxx path: $cxxpath" 1>&2
         echo "cxxflags: $cxxflags" 1>&2
         echo "python path: $pypath" 1>&2
-        echo "cmake args: $cmake_args"
-        echo "make args: $make_args"
-        echo "ninja args: $ninja_args"
-        echo "ctest args: $ctest_args"
+        echo "cmake args:" "${cmake_args[@]}"
+        echo "make args:" "${make_args[@]}"
+        echo "ninja args:" "${ninja_args[@]}"
+        echo "ctest args:" "${ctest_args[@]}"
         echo "do_env: $do_env" 1>&2
         echo "do_clean: $do_clean" 1>&2
         echo "do_prep: $do_prep" 1>&2
@@ -155,7 +169,7 @@ function build() {
     }
 
     function __build_env_jss() {
-        if [ "x$JAVA_HOME" == "x" ]; then
+        if [ "x$JAVA_HOME" == "x" ] && [ -e tools/autoenv.sh ]; then
             source tools/autoenv.sh
             return $?
         fi
@@ -215,12 +229,12 @@ function build() {
     }
 
     function __build_prep_cmake_ninja() {
-        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G Ninja ..
+        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake "${cmake_args[@]}" -G Ninja ..
         return $?
     }
 
     function __build_prep_cmake_make() {
-        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake $cmake_args -G "Unix Makefiles" ..
+        CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake "${cmake_args[@]}" -G "Unix Makefiles" ..
         return $?
     }
 
@@ -280,12 +294,12 @@ function build() {
     }
 
     function __build_make() {
-        time -p make $make_args
+        time -p make "${make_args[@]}"
         return $?
     }
 
     function __build_ninja() {
-        time -p $which_ninja $ninja_args
+        time -p $which_ninja "${ninja_args[@]}"
         return $?
     }
 
@@ -326,7 +340,7 @@ function build() {
     }
 
     function __build_test_ctest() {
-        time -p ctest $ctest_args
+        time -p ctest "${ctest_args[@]}"
         return $?
     }
 
