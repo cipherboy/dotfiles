@@ -122,3 +122,6 @@ function tcd() {
     mkdir -p "$HOME/tmp/$num" 2>/dev/null
     pushd "$HOME/tmp/$num"
 }
+
+# sort | uniq -c | sort -n
+alias sun="sort | uniq -c | sort -n"
