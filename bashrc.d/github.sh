@@ -5,14 +5,19 @@ function gh_pr_commits() {
     local repo="$2"
     local pull="$3"
 
-    local commits="$(curl -s https://api.github.com/repos/$user/$repo/pulls/$pull/commits 2>/dev/null | jq length)"
+    if [ -z "$user" ] || [ -z "$repo" ] || [ -z "$pull" ]; then
+        echo "Usage: gh_pr_commits user repo pull"
+        return 1
+    fi
+
+    local commits="$(curl -s "https://api.github.com/repos/$user/$repo/pulls/$pull/commits" 2>/dev/null | jq length)"
     echo "$user/$repo pr#$pull has $commits commits"
 
-    local commit_sha="$(curl -s https://api.github.com/repos/$user/$repo/pulls/$pull | jq '.["merge_commit_sha"]' | sed 's/"//g')"
-    for i in $(seq 1 $commits); do
-        echo "$commit_sha"
+    local commit_sha="$(curl -s "https://api.github.com/repos/$user/$repo/pulls/$pull" | jq '.["merge_commit_sha"]' | sed 's/"//g')"
+    for i in $(seq 1 "$commits"); do
+        echo "$i: $commit_sha"
 
-        local commit_info="$(curl -s https://api.github.com/repos/$user/$repo/git/commits/$commit_sha)"
+        local commit_info="$(curl -s "https://api.github.com/repos/$user/$repo/git/commits/$commit_sha")"
         local parent_count="$(echo "$commit_info" | jq '.["parents"]' | jq length)"
         if [ "x$parent_count" != "x1" ]; then
             echo "Can't process commit $commit_sha: merge commit with multiple parents."
@@ -26,6 +31,11 @@ function gh_pr_commits() {
 
 function gh_keys() {
     local user="$1"
+
+    if [ -z "$user" ]; then
+        echo "Usage: gh_keys user"
+        return 1
+    fi
 
     curl "https://api.github.com/users/$user/keys" 2>/dev/null | jq -r '.[].key' | sed "s/\$/ github-$user/g"
 }
