@@ -116,6 +116,14 @@ function vgff() {
 function vgif() {
     v $(gif "$@" | grep -o '^[^:]*:[0-9]*:')
 }
+function vgifr() {
+    count="$(gif "$@" | grep -o '^[^:]*:[0-9]*:' | wc -l)"
+    for i in $(seq 1 "$count"); do
+        ref="$(gif "$@" | grep -o '^[^:]*:[0-9]*:' | tail -n "+$i" | head -n 1)"
+        v "$ref"
+        sleep 0.3
+    done
+}
 function vfgif() {
     v $(gif "$@" | grep -o '^[^:]*:[0-9]*:' | grep -o '^[^:]*' | sort -u)
 }
