@@ -92,6 +92,15 @@ function build() {
             use_afl="true"
         elif [ "x$arg" == "xrpm" ]; then
             do_rpm="true"
+        elif [ "x$arg" == "xasan" ]; then
+            cflags="$cflags -fsanitize=address"
+            cxxflags="$cxxflags -fsanitize=address"
+        elif [ "x$arg" == "xlsan" ]; then
+            cflags="$cflags -fsanitize=leak"
+            cxxflags="$cxxflags -fsanitize=leak"
+        elif [ "x$arg" == "xubsan" ]; then
+            cflags="$cflags -fsanitize=undefined -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=object-size -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=nonnull-attribute -fsanitize=returns-nonnull-attribute -fsanitize=bool -fsanitize=enum -fsanitize=vptr -fsanitize=pointer-overflow -fsanitize=builtin"
+            cxxflags="$cflags -fsanitize=undefined -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=object-size -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=nonnull-attribute -fsanitize=returns-nonnull-attribute -fsanitize=bool -fsanitize=enum -fsanitize=vptr -fsanitize=pointer-overflow -fsanitize=builtin"
         fi
     done
 
@@ -376,6 +385,15 @@ function build() {
     }
 
     function __build_test_python() {
+        if [ -d tests ]; then
+            if [ "x$pypath" == "$py2path" ]; then
+                time -p pytest
+                return $?
+            else
+                time -p pytest-3
+                return $?
+            fi
+        fi
         time -p $pypath setup.py test
         return $?
     }
