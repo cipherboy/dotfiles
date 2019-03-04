@@ -426,7 +426,7 @@ function gtbac() {
 
 function gtrbf() {
     local branch="$(git rev-parse --abbrev-ref HEAD)"
-    gtom && gtum && gto "$branch" && gtrm && gtom && gtrb "$branch" && gtp && gto "$branch"
+    (gtom && gtum && gto "$branch" && gtrm && gtom && gtrb "$branch") && (gtpom ; gtpum) ; gto "$branch"
 }
 
 ### ALWAYS RUN FUNCTIONS ##
