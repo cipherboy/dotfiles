@@ -172,8 +172,11 @@ function ghcd() {
         repository="$4"
     fi
 
+    local all_paths=""
     local base="$gitbase/$provider"
     local path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs --basename "$repository" "$username" "$repository")"
+    all_paths="$all_paths
+$path"
     if [ -d "$base/$path/.git" ]; then
         pushd "$base/$path"
         git status
@@ -181,6 +184,8 @@ function ghcd() {
     fi
 
     path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs --basename "$repository" "$repository")"
+    all_paths="$all_paths
+$path"
     if [ -d "$base/$path/.git" ]; then
         pushd "$base/$path"
         git status
@@ -188,6 +193,8 @@ function ghcd() {
     fi
 
     path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs "$username" "$repository")"
+    all_paths="$all_paths
+$path"
     if [ -d "$base/$path/.git" ]; then
         pushd "$base/$path"
         git status
@@ -195,12 +202,15 @@ function ghcd() {
     fi
 
     path="$(ffind --location "$base" --base-location "$base" --depth 2 --only-dirs "$repository")"
+    all_paths="$all_paths
+$path"
     if [ -d "$base/$path/.git" ]; then
         pushd "$base/$path"
         git status
         return 0
     fi
 
+    echo "$all_paths" | sort -u | sed '/^$/d'
 
     return 1
 }
