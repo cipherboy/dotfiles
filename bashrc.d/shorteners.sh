@@ -64,6 +64,13 @@ function ap() {
     ansible-playbook "$name" "$@"
 }
 
+function ap8() {
+    local name="$1"
+    shift
+
+    ap "$name" -e ansible_python_interpreter=/usr/libexec/platform-python "$@"
+}
+
 function aph() {
     local name="$1"
     shift
@@ -84,6 +91,7 @@ function rte() {
 
     if [ ! -e "$path" ]; then
         echo "Unable to find tasks/main.yml for $role" 1>&2
+        ls --color=always -d roles/* | sed 's/roles\///g'
         return 1
     fi
     "$EDITOR" "$path"
@@ -102,6 +110,7 @@ function rve() {
 
     if [ ! -e "$path" ]; then
         echo "Unable to find vars/main.yml for $role" 1>&2
+        ls --color=always -d roles/* | sed 's/roles\///g'
         return 1
     fi
     "$EDITOR" "$path"
