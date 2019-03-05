@@ -1,5 +1,15 @@
 # git aliases
 alias gta='git add'
+function gtac() {
+    local file="$1"
+    if [ ! -e "$file" ]; then
+        echo "Usage: gtac <file>"
+        echo "Adds and commits a fixup to <file>"
+        return 1
+    fi
+
+    git add "$file" && git commit -m "FIXUP $file"
+}
 alias gtb='git branch'
 function gtbc() {
     local commit="$1"
