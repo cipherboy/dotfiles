@@ -210,7 +210,7 @@ function v() {(
     # If we have no known files, edit the arguments anyways
     if [ $max_seq == 0 ]; then
         echo vim "${editor_args[@]}" 1>&2
-        vim "${editor_args[@]}"
+        exec vim "${editor_args[@]}"
         return $?
     fi
 
@@ -222,8 +222,10 @@ function v() {(
 
         __do_update_vimrc "$file"
 
-        echo vim "${editor_args[@]}" $line "$file" 1>&2
-        vim "${editor_args[@]}" $line "$file"
+        (
+            echo vim "${editor_args[@]}" $line "$file" 1>&2
+            exec vim "${editor_args[@]}" $line "$file"
+        )
         ret=$?
         if [ $ret != 0 ]; then
             return $ret
