@@ -11,6 +11,7 @@
 function v() {(
     shopt -s extglob
     shopt -s globstar
+    shopt -s checkwinsize
 
     local reload=false
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
