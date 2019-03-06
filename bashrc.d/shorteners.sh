@@ -51,6 +51,7 @@ function crc() {
 function ap() {
     local name="$1"
     shift
+    local extra_args=()
     local ret=0
 
     name="$(ffind --files --depth 1 yml "$name")"
@@ -60,8 +61,17 @@ function ap() {
         return $ret
     fi
 
-    echo ansible-playbook "$name" "$@"
-    ansible-playbook "$name" "$@"
+    if [ -e hosts ]; then
+        extra_args+=("-i" "hosts")
+    fi
+
+    echo ansible-playbook "$name" "${extra_args[@]}" "$@"
+    ansible-playbook "$name" "${extra_args[@]}" "$@"
+    ret=$?
+
+    rm -f ./*.retry
+
+    return $ret
 }
 
 function ap8() {
@@ -69,13 +79,6 @@ function ap8() {
     shift
 
     ap "$name" -e ansible_python_interpreter=/usr/libexec/platform-python "$@"
-}
-
-function aph() {
-    local name="$1"
-    shift
-
-    ap "$name" -i hosts "$@"
 }
 
 function rte() {
