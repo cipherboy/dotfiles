@@ -10,10 +10,10 @@ function gtac() {
 
     git add "$file" && git commit -m "FIXUP $file"
 }
-alias gtb='git branch'
+alias gtb='git branch  --sort=committerdate'
 function gtbc() {
     local commit="$1"
-    git branch --all --contains "$commit" | sed 's#/# #g' | awk '{print $NF}' | sort -u
+    git branch --all --contains "$commit"  --sort=committerdate | sed 's#/# #g' | awk '{print $NF}' | sort -u
 }
 alias gtbn='basename "$(gtcd)"'
 alias gtc='git clone'
@@ -30,6 +30,7 @@ alias gtdt='git difftool'
 alias gtdc='git diff --cached'
 alias gtdh='git diff HEAD~'
 alias gtdf='git diff --name-only'
+alias gtdf='git diff --name-only master'
 alias gtdfh='git diff --name-only HEAD~'
 alias gtfp='git push --force'
 alias gtl='git log'
