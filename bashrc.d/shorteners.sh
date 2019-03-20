@@ -137,3 +137,6 @@ function tcd() {
 
 # sort | uniq -c | sort -n
 alias sun="sort | uniq -c | sort -n"
+
+# A shrug!
+alias shrug="echo '¯\_(ツ)_/¯'"
