@@ -38,6 +38,8 @@ function cr() {
     podman run -ti "$version" /bin/bash
 }
 
+alias crl="podman container list"
+
 function crc() {
     local version="$1"
     if [ "x$version" = "x" ]; then
