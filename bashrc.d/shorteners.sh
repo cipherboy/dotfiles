@@ -40,6 +40,25 @@ function cr() {
 
 alias crl="podman container list"
 
+function cra() {
+    local name="$1"
+    local matches="$(crl | grep -i "$name" | wc -l)"
+
+    if (( matches == 0 )); then
+        crl
+        echo "No matching containers for $name"
+        return 1
+    elif (( matches > 1 )); then
+        crl | grep -i "$name"
+        return $matches
+    fi
+
+    local match="$(crl | grep -i "$name" | awk '{print $1}')"
+    echo "Attaching to $match..."
+
+    podman exec -ti "$match" bash -i
+}
+
 function crc() {
     local version="$1"
     if [ "x$version" = "x" ]; then
