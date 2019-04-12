@@ -29,6 +29,7 @@ alias gtd='git diff'
 alias gtdt='git difftool'
 alias gtdc='git diff --cached'
 alias gtdh='git diff HEAD~'
+alias gtdm='git diff master'
 alias gtdf='git diff --name-only'
 alias gtdfm='git diff --name-only master'
 alias gtdfh='git diff --name-only HEAD~'
@@ -102,6 +103,13 @@ function gtuf() {
     git fetch origin "$branch"
     git reset --hard "origin/$branch"
     git status
+}
+
+function gtff() {
+    local abspath="$(gtcd)"
+    local relpath="$(realpath --relative-to="$(pwd)" "$abspath")"
+
+    find "$relpath" -path '*/build/*' -prune -path '*.git*' -prune -o -print | grep -i "$@"
 }
 
 function gthr() {
