@@ -75,11 +75,13 @@ function ap() {
     local extra_args=()
     local ret=0
 
-    name="$(ffind --files --depth 1 yml "$name")"
-    ret=$?
-    if (( ret != 0 )); then
-        echo "$name"
-        return $ret
+    if [ ! -e "$name" ]; then
+        name="$(ffind --files --depth 1 yml "$name")"
+        ret=$?
+        if (( ret != 0 )); then
+            echo "$name"
+            return $ret
+        fi
     fi
 
     if [ -e hosts ]; then
