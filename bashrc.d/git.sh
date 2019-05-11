@@ -8,7 +8,7 @@ function gtac() {
         return 1
     fi
 
-    git add "$file" && git commit -m "FIXUP $file"
+    git add "$file" && git commit --signoff "FIXUP $file"
 }
 alias gtb='git branch  --sort=committerdate'
 function gtbc() {
@@ -37,7 +37,7 @@ alias gtfa='git fetch --all'
 alias gtfp='git push --force'
 alias gtl='git log'
 alias gtm='git commit -s'
-alias gtma='git commit -s --amend'
+alias gtma='git commit -s --amend --reset-author'
 alias gto='git checkout'
 alias gtob='git checkout -b'
 alias gtom='git checkout master'
