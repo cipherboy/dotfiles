@@ -13,6 +13,8 @@ function renum() {
         local pnum="$(pad "$num")"
         local pnnum="$(pad "$nnum")"
 
+        echo "$num | $nnum | $pnum | $pnnum"
+
         if [ -e "$IMAGE_PREFIX$pnum.jpg" ]; then
             mv "$IMAGE_PREFIX$pnum.jpg" "$IMAGE_PREFIX$pnnum.jpg"
         fi
@@ -77,12 +79,9 @@ function r50() {
     fi
 
     mkdir -p "$name"_50
-    cp "$name"/*.jpg -rv "$name"_50/
 
-    pushd "$name"_50
-        for file in *.jpg; do
-            convert -resize 50% $file $file
-        done
+    pushd "$name"
+        parallel -j 150% convert -resize 50% '{}' ../"$name"_50/'{}' ::: *.jpg
     popd
 }
 
