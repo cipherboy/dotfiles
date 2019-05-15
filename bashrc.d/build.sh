@@ -91,7 +91,9 @@ function build() {
         elif [ "x$arg" == "xfuzz" ]; then
             use_afl="true"
         elif [ "x$arg" == "xrpm" ]; then
-            do_rpm="true"
+            do_rpm="rpm"
+        elif [ "x$arg" == "xsrpm" ]; then
+            do_rpm="srpm"
         elif [ "x$arg" == "xasan" ]; then
             cflags="$cflags -fsanitize=address"
             cxxflags="$cxxflags -fsanitize=address"
@@ -427,7 +429,7 @@ function build() {
     }
 
     function __build_rpm_script() {
-        time -p ./build.sh --with-timestamp --with-commit-id rpm
+        time -p ./build.sh --with-timestamp --with-commit-id "$do_rpm"
     }
 
     function __build_rpm() {
@@ -496,7 +498,7 @@ function build() {
         fi
     fi
 
-    if [ "$do_rpm" == "true" ]; then
+    if [ "$do_rpm" != "false" ]; then
         __build_rpm
         ret="$?"
         if (( ret != 0 )); then
