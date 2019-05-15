@@ -8,7 +8,7 @@ function gtac() {
         return 1
     fi
 
-    git add "$file" && git commit --signoff "FIXUP $file"
+    git add "$file" && git commit --signoff -m "FIXUP $file"
 }
 alias gtb='git branch  --sort=committerdate'
 function gtbc() {
