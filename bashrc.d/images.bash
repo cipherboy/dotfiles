@@ -85,6 +85,13 @@ function r50() {
     popd
 }
 
+function o50() {
+    ln -s orig all
+    r50 all
+    mv all_50 orig_50
+    ln -s orig_50 all_50
+}
+
 function k50() {
     r50 "keep"
 }
