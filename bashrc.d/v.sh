@@ -157,6 +157,36 @@ function v() {(
         sed 's/^" \(set softtabstop\)/\1/g' ~/.vimrc -i
     }
 
+    function __count_spaces() {
+        local k="$1"
+
+        python3 -c "import sys; k = $k; lens = set(map(lambda x: (len(x) - 1) % k, sys.stdin.readlines()))
+if 0 in lens and len(lens) == 1:
+    print(k)"
+    }
+
+    function __detect_spaces() {
+        local file="$1"
+
+        local two="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 2)"
+        local four="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 4)"
+        local eight="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 8)"
+
+        if [ ! -z "$eight" ]; then
+            sed 's/shiftwidth=[0-9]/shiftwidth=8/g' ~/.vimrc -i
+            sed 's/softtabstop=[0-9]/softtabstop=8/g' ~/.vimrc -i
+        elif [ ! -z "$four" ]; then
+            sed 's/shiftwidth=[0-9]/shiftwidth=4/g' ~/.vimrc -i
+            sed 's/softtabstop=[0-9]/softtabstop=4/g' ~/.vimrc -i
+        elif [ ! -z "$two" ]; then
+            sed 's/shiftwidth=[0-9]/shiftwidth=2/g' ~/.vimrc -i
+            sed 's/softtabstop=[0-9]/softtabstop=2/g' ~/.vimrc -i
+        else
+            sed 's/shiftwidth=[0-9]/shiftwidth=4/g' ~/.vimrc -i
+            sed 's/softtabstop=[0-9]/softtabstop=4/g' ~/.vimrc -i
+        fi
+    }
+
     function __do_update_vimrc() {
         local file="$1"
         grep -q '[[:space:]]$' "$file"
@@ -172,6 +202,7 @@ function v() {(
         local count_tabs="$(grep -c '^	' "$file" 2>/dev/null)"
         if (( count_spaces > count_tabs )); then
             __use_spaces
+            __detect_spaces "$file"
         elif (( count_tabs > count_spaces )); then
             __use_tabs
         fi
