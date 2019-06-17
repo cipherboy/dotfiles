@@ -97,45 +97,6 @@ export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:/usr/sb
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 
-
-# grep aliases
-alias gir='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iIr'
-alias gic='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -nIHr'
-alias gif='grep --exclude=tags --exclude-dir=.git --exclude-dir=build -iInHr'
-alias gff="find . -path '*/build/*' -prune -path '*.git*' -prune -o -print | grep -i"
-
-function vgff() {
-    local query="$1"
-    for file in $(find . -path '*/build/*' -prune -path '*.git*' -prune -o -print | grep -i "$query"); do
-        if [ -f "$file" ]; then
-            vi "$file"
-        fi
-    done
-}
-
-function vgif() {
-    v $(gif "$@" | grep -o '^[^:]*:[0-9]*:')
-}
-function vgifr() {
-    count="$(gif "$@" | grep -o '^[^:]*:[0-9]*:' | wc -l)"
-    for i in $(seq 1 "$count"); do
-        ref="$(gif "$@" | grep -o '^[^:]*:[0-9]*:' | tail -n "+$i" | head -n 1)"
-        v "$ref"
-        sleep 0.3
-    done
-}
-function vfgif() {
-    v $(gif "$@" | grep -o '^[^:]*:[0-9]*:' | grep -o '^[^:]*' | sort -u)
-}
-function vgic() {
-    v $(gic "$@" | grep -o '^[^:]*:[0-9]*:')
-}
-
-function gitc() {
-    local query="$1"
-    grep -ro "$query" | wc -l
-}
-
 # project aliases
 alias actags='ctags -R  --c-kinds=+cdefglmnpstuvx --langmap=c:+.cin.hin'
 
