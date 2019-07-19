@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_PREFIX="DSC_"
+IMAGE_PREFIX="AMS_"
 
 function renum() {
     local const="$1"

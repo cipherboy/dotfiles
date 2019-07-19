@@ -163,3 +163,8 @@ alias sun="sort | uniq -c | sort -n"
 
 # A shrug!
 alias shrug="echo '¯\_(ツ)_/¯'"
+
+# Kill from ps
+function pskill() {
+    awk '{print $2}' | xargs -l kill
+}
