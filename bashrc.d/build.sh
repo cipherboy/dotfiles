@@ -291,15 +291,15 @@ function build() {
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
             return $?
+        elif [ -e "Makefile" ]; then
+            # If there is already a Makefile, try running it :)
+            return 0
         elif [ -d "src" ]; then
             pushd src || return
             __build_prep
             local ret=$?
             popd
             return $ret
-        elif [ -e "Makefile" ]; then
-            # If there is already a Makefile, try running it :)
-            return 0
         else
             echo "Cannot build prep: unknown build system"
             return 1
