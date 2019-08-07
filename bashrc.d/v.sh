@@ -15,19 +15,35 @@ function v() {(
 
     local reload=false
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+    local hg_root="$(hg root 2>/dev/null)"
+    local root="$git_root"
+    if [ -z "$root" ]; then
+        root="$hg_root"
+    fi
 
     function find_filter() {
         sed '/\(\/.git\/\|\.git[a-z]*$\)/d' |
+        sed '/\(\/.hg\/\|\.hg[a-z]*$\)/d' |
         sed '/\/build\//d' |
+        sed '/\/out\//d' |
+        sed '/\/dist\//d' |
+        sed '/\/\.pytest_cache\//d' |
+        sed '/\/\.mypy_cache\//d' |
         sed '/\/__pycache__\//d'
     }
 
-    function __v_compute_git_index() {
-        local index_location="$git_root/.git/v-git-document-index"
+    function __v_compute_index() {
+        local index_location=""
 
-        if [ "x$git_root" == "x" ]; then
+        if [ -n "$git_root" ]; then
+            index_location="$root/.git/v-git-document-index"
+        elif [ -n "$hg_root" ]; then
+            index_location="$root/.hg/v-hg-document-index"
+        else
             return 1
         fi
+
+        echo "$index_location"
 
         if [ -e "$index_location" ]; then
             local modified="$(stat --format=%Y "$index_location")"
@@ -43,7 +59,7 @@ function v() {(
         echo "Generating file index at $index_location" 1>&2
 
         # Ignore the contents of .git and build directories.
-        find "$git_root" -type f 2>/dev/null |
+        find "$root" -type f 2>/dev/null |
             find_filter > "$index_location"
     }
 
@@ -61,8 +77,8 @@ function v() {(
             return 0
         fi
 
-        if [ "x$git_root" != "x" ] &&  [ -e "$git_root/$candidate" ] && [ ! -d "$git_root/$candidate" ]; then
-            echo "$git_root/$candidate"
+        if [ "x$root" != "x" ] &&  [ -e "$root/$candidate" ] && [ ! -d "$root/$candidate" ]; then
+            echo "$root/$candidate"
             return 0
         fi
 
@@ -78,13 +94,12 @@ function v() {(
 
         # Fast options don't exist. Let's try a few other options before
         # giving up...
-        if [ "x$git_root" != "x" ]; then
+        if [ "x$root" != "x" ]; then
             # Compute and store an index of files in the git root. This allows
             # us to find a file in the git root, but not recompute this index
             # every time.
 
-            __v_compute_git_index "$git_root"
-            local index_location="$git_root/.git/v-git-document-index"
+            local index_location="$(__v_compute_index)"
             local index="$(cat "$index_location" | grep -F "$candidate")"
             local index_count="$(wc -l <<< "$index")"
 
