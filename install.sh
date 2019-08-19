@@ -80,7 +80,7 @@ function __do_install() {
 
     if [ "$do_install_ccache" == "true" ]; then
         echo "Installing ccache..."
-        mkdir -p -v "$HOME/.ccahe"
+        mkdir -p -v "$HOME/.ccache"
         cp -v ccache.conf "$HOME/.ccache/ccache.conf"
     fi
 
