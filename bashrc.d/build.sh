@@ -127,6 +127,8 @@ function build() {
             ccpath="$which_clang"
             cxxpath="$which_clangpp"
         fi
+        cflags="-Wno-unused-command-line-argument $cflags -Wno-unused-command-line-argument"
+        cxxflags="-Wno-unused-command-line-argument $cxxflags -Wno-unused-command-line-argument"
     fi
 
     if [ "$use_parallel" == "true" ]; then
