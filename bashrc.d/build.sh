@@ -69,12 +69,12 @@ function build() {
             use_clang="true"
         elif [ "x$arg" == "xdebug" ]; then
             cmake_args+=("-DCMAKE_BUILD_TYPE=Debug")
-            ctest_args+=("--debug")
             cflags="$cflags -Og -ggdb"
             cxxflags="$cxxflags -Og -ggdb"
         elif [ "x$arg" == "xoptimized" ]; then
-            cflags="$cflags -O3"
-            cxxflags="$cxxflags -O3"
+            cmake_args+=("-DCMAKE_BUILD_TYPE=Release")
+            cflags="$cflags -O3 -march=native"
+            cxxflags="$cxxflags -O3 -mtune=native"
         elif [ "x$arg" == "xwarnings" ]; then
             cflags="$cflags -Wall -Wextra -Werror"
             cxxflags="$cxxflags -Wall -Wextra -Werror"

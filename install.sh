@@ -60,7 +60,7 @@ function __do_install() {
     if [ "$do_install_vimrc" == "true" ]; then
         echo "Installing vimrc..."
         cp -v vimrc "$HOME/.vimrc"
-        mkdir -pv "$HOME/.vim/swapfiles"
+        mkdir -pv "$HOME/.vim/swapfiles" "$HOME/.vim/spell"
     fi
 
     if [ "$do_install_tmux" == "true" ]; then
