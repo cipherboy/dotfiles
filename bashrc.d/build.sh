@@ -271,7 +271,11 @@ function build() {
 
     function __build_prep_autotools() {
         if [ ! -e "configure" ]; then
-            time -p autoreconf -f -i
+            if [ -e autogen.sh ]; then
+                time -p ./autogen.sh
+            else
+                time -p autoreconf -f -i
+            fi
         fi
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p ./configure
         return $?
