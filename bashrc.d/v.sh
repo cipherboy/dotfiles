@@ -29,7 +29,8 @@ function v() {(
         sed '/\/dist\//d' |
         sed '/\/\.pytest_cache\//d' |
         sed '/\/\.mypy_cache\//d' |
-        sed '/\/__pycache__\//d'
+        sed '/\/__pycache__\//d' |
+        sed '/\.pyc$/d'
     }
 
     function __v_compute_index() {
