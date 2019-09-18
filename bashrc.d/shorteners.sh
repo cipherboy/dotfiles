@@ -35,7 +35,7 @@ function cr() {
         version="fedora:rawhide"
     fi
 
-    podman run -ti "$version" /bin/bash
+    podman run --volume "$HOME/.ccache:/root/.ccache:shared" -ti "$version" /bin/bash
 }
 
 alias crl="podman container list"
