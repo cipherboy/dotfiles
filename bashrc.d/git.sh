@@ -452,6 +452,29 @@ function gtrbf() {
     (gtom && gtum && gto "$branch" && gtrm && gtom && gtrb "$branch") && (gtpom ; gtpum) ; gto "$branch"
 }
 
+## Source git completion
+if [ -f /usr/share/bash-completion/completions/git ]; then
+   source /usr/share/bash-completion/completions/git
+    __git_complete gta _git_add
+    __git_complete gtb _git_branch
+    __git_complete gtc _git_clone
+    __git_complete gtcp _git_cherry_pick
+    __git_complete gtd _git_diff
+    __git_complete gtdf _git_diff
+    __git_complete gtl _git_log
+    __git_complete gtm _git_commit
+    __git_complete gtma _git_commit
+    __git_complete gto _git_checkout
+    __git_complete gtob _git_checkout
+    __git_complete gtp _git_push
+    __git_complete gtr _git_rebase
+    __git_complete gtri _git_rebase
+    __git_complete gtre _git_reset
+    __git_complete gtsl _git_shortlog
+    __git_complete gtu _git_pull
+    __git_complete gtub _git_checkout
+fi
+
 ### ALWAYS RUN FUNCTIONS ##
 
 # Always source pre-repo bash history if we're in a git directory
