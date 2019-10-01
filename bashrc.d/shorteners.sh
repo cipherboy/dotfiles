@@ -168,3 +168,6 @@ alias shrug="echo '¯\_(ツ)_/¯'"
 function pskill() {
     awk '{print $2}' | xargs -l kill
 }
+
+# Do a lot of builds
+alias badwc="build all warnings debug && build all warnings debug clang && build all && build all clang"
