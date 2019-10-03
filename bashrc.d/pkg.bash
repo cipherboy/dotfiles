@@ -15,3 +15,7 @@ alias f29l='_fedpkg29 local'
 alias f28l='_fedpkg28 local'
 alias r8l='_rhpkg8 local'
 alias r7l='_rhpkg7 local'
+
+function getsrc() {
+    rpmspec -P *.spec | grep -i 'Source0:' | awk '{print $NF}' | xargs wget
+}
