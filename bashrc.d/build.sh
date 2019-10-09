@@ -224,7 +224,7 @@ function build() {
     }
 
     function __build_clean() {
-        if [ -e "CMakeLists.txt" ]; then
+        if [ -e "CMakeLists.txt" ] || [ -e meson.build ]; then
             __build_clean_cmake
             return $?
         elif [ -e "Makefile" ]; then
@@ -269,6 +269,10 @@ function build() {
         fi
     }
 
+    function __build_prep_meson() {
+        meson setup build
+    }
+
     function __build_prep_autotools() {
         if [ ! -e "configure" ]; then
             if [ -e autogen.sh ]; then
@@ -291,6 +295,8 @@ function build() {
         if [ -e "CMakeLists.txt" ]; then
             __build_prep_cmake
             return $?
+        elif [ -e "meson.build" ]; then
+            __build_prep_meson
         elif [ -e "configure.ac" ] || [ -e "configure.in" ]; then
             __build_prep_autotools
             return $?
