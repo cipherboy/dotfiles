@@ -3,6 +3,7 @@ GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=
 alias gir="grep $GREP_EXCLUDE -iIr"
 alias gic="grep $GREP_EXCLUDE -nIHr"
 alias gif="grep $GREP_EXCLUDE -iInHr"
+alias gih="grep --include=*.h -ir"
 alias gin="grep $GREP_EXCLUDE -iHrl"
 alias gff="find . -path '*/build/*' -prune -path '*.git*' -prune -o -print | grep -i"
 
