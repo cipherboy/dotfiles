@@ -15,7 +15,9 @@ fi
 # Shell Options
 shopt -s checkwinsize
 shopt -s globstar 2> /dev/null
-bind "set show-all-if-ambiguous on"
+if [ -t 1 ]; then
+  bind "set show-all-if-ambiguous on"
+fi
 
 # Keep all history
 shopt -s histappend
