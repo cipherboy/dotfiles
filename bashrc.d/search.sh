@@ -1,5 +1,5 @@
 # grep aliases
-GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build"
+GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache"
 alias gir="grep $GREP_EXCLUDE -iIr"
 alias gic="grep $GREP_EXCLUDE -nIHr"
 alias gif="grep $GREP_EXCLUDE -iInHr"

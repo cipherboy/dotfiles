@@ -132,3 +132,35 @@ function person() {
 
     cp -v "all/$IMAGE_PREFIX$number.jpg" -v "$name/$IMAGE_PREFIX$number.jpg"
 }
+
+function ccpy() {
+    local src="$(realpath "$1")"
+    local dst="$(realpath "$2")"
+
+    if [ ! -d "$src" ]; then
+        echo "Usage: ccpy /path/to/camera-card /path/to/destination" 1>&2
+        echo "Unable to find source!" 1>&2
+        return 1
+    fi
+
+    if [ ! -d "$dst" ]; then
+        mkdir -p "$dst"
+    fi
+
+    pushd "$src"
+        for file in *.JPG; do
+            local shash="$(sha512sum < "$src/$file")"
+            local dhash="$(sha512sum < "$dst/$file")"
+
+            while [ "x$shash" != "x$dhash" ]; do
+                if [ -e "$dst/$file" ]; then
+                    rm "$dst/$file"
+                fi
+                cp -prv "$src/$file" "$dst/$file"
+
+                shash="$(sha512sum < "$src/$file")"
+                dhash="$(sha512sum < "$dst/$file")"
+            done
+        done
+    popd
+}
