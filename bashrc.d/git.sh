@@ -1,14 +1,15 @@
 # git aliases
 alias gta='git add'
 function gtac() {
-    local file="$1"
-    if [ ! -e "$file" ]; then
-        echo "Usage: gtac <file>"
-        echo "Adds and commits a fixup to <file>"
-        return 1
-    fi
+    for file in "$@"; do
+        if [ ! -e "$file" ]; then
+            echo "Usage: gtac <file>"
+            echo "Adds and commits a fixup to <file>"
+            return 1
+        fi
 
-    git add "$file" && git commit --signoff -m "FIXUP $file"
+        git add "$file" && git commit --signoff -m "FIXUP $file"
+    done
 }
 alias gtb='git branch  --sort=committerdate'
 function gtbc() {
