@@ -148,7 +148,7 @@ function ccpy() {
     fi
 
     pushd "$src"
-        for file in *.JPG; do
+        for file in *; do
             local shash="$(sha512sum < "$src/$file")"
             local dhash="$(sha512sum < "$dst/$file")"
 
