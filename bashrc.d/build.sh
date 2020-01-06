@@ -23,7 +23,8 @@ function build() {
     local do_popd="true"
     local use_clang="false"
     local use_afl="false"
-    local use_parallel="true"
+    local use_parallel_build="true"
+    local use_parallel_tests="true"
     local cmake_args=()
     local make_args=()
     local ninja_args=()
@@ -81,7 +82,12 @@ function build() {
         elif [ "x$arg" == "xmake" ]; then
             which_ninja=""
         elif [ "x$arg" == "xserial" ]; then
-            use_parallel="false"
+            use_parallel_build="false"
+            use_parallel_tests="false"
+        elif [ "x$arg" == "xserial-build" ]; then
+            use_parallel_build="false"
+        elif [ "x$arg" == "xserial-tests" ]; then
+            use_parallel_tests="false"
         elif [ "x$arg" == "xpython2" ]; then
             pypath="$py2path"
         elif [ "x$arg" == "xpython3" ]; then
@@ -131,15 +137,20 @@ function build() {
         cxxflags="-Wno-unused-command-line-argument $cxxflags -Wno-unused-command-line-argument"
     fi
 
-    if [ "$use_parallel" == "true" ]; then
+    if [ "$use_parallel_build" == "true" ]; then
         local num_cores="$(grep -c '^processor[[:space:]]*:' < /proc/cpuinfo)"
         num_cores=$(( num_cores + 2 ))
         make_args+=("-j" "$num_cores")
         ninja_args+=("-j" "$num_cores")
-        ctest_args+=("-j" "$num_cores")
     else
         make_args+=("-j" "1")
         ninja_args+=("-j" "1")
+    fi
+
+    if [ "$use_parallel_tests" == "true" ]; then
+        local num_cores="$(grep -c '^processor[[:space:]]*:' < /proc/cpuinfo)"
+        ctest_args+=("-j" "$(( num_cores / 2 ))")
+    else
         ctest_args+=("-j" "1")
     fi
 
