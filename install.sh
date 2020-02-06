@@ -47,9 +47,12 @@ function __do_install() {
     if [ "$do_install_bash" == "true" ]; then
         echo "Installing bash..."
         cp -v bashrc "$HOME/.bashrc"
-        rm -vrf "$HOME/.bashrc.d"
-        mkdir -p "$HOME/.bashrc.d"
-        cp -rv bashrc.d/* "$HOME/.bashrc.d/"
+        pushd bashrc.d
+            for file in *; do
+                rm -vf "$HOME/.bashrc.d/$file"
+                cp -rv "$file" "$HOME/.bashrc.d/"
+            done
+        popd
     fi
 
     if [ "$do_install_git" == "true" ]; then
