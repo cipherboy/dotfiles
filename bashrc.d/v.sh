@@ -30,7 +30,10 @@ function v() {(
         sed '/\/\.pytest_cache\//d' |
         sed '/\/\.mypy_cache\//d' |
         sed '/\/__pycache__\//d' |
-        sed '/\.pyc$/d'
+        sed '/\.pyc$/d' |
+        sed '/\/target\//d' |
+        sed '/\/\.jar$/d' |
+        sed '/\/\.class$/d'
     }
 
     function __v_compute_index() {
