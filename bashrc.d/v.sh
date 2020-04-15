@@ -13,7 +13,8 @@ function v() {(
     shopt -s globstar
     shopt -s checkwinsize
 
-    local config="$HOME/.SpaceVim.d/init.toml"
+    local vconfig="$HOME/.vimrc"
+    local svconfig="$HOME/.SpaceVim.d/init.toml"
     local reload=false
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
     local hg_root="$(hg root 2>/dev/null)"
@@ -73,7 +74,7 @@ function v() {(
         local candidate="$(sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g' <<< "$raw_candidate")"
 
         if [ "x$raw_candidate" == "x-R" ]; then
-          return 1
+            return 1
         fi
 
         if [ -e "$candidate" ] && [ ! -d "$candidate" ]; then
@@ -163,12 +164,51 @@ function v() {(
         return 1
     }
 
+    function __preserve_whitespace() {
+        if [ -e "$vconfig" ]; then
+            sed 's/^\(autocmd BufWritePre\)/" \1/g' "$vconfig" -i
+        fi
+    }
+
+    function __no_preserve_whitespace() {
+        if [ -e "$vconfig" ]; then
+            sed 's/^" \(autocmd BufWritePre\)/\1/g' "$vconfig" -i
+        fi
+    }
+
     function __use_tabs() {
-        sed 's/expand_tab.*/expand_tab = false/g' "$config" -i
+        if [ -e "$vconfig" ]; then
+            sed 's/^set expandtab/set noexpandtab/g' "$vconfig" -i
+            sed 's/^\(set softtabstop\)/" \1/g' "$vconfig" -i
+        fi
+
+        if [ -e "$svconfig" ]; then
+            sed 's/expand_tab.*/expand_tab = false/g' "$svconfig" -i
+        fi
     }
 
     function __use_spaces() {
-        sed 's/expand_tab.*/expand_tab = true/g' "$config" -i
+        if [ -e "$vconfig" ]; then
+            sed 's/^set noexpandtab/set expandtab/g' "$vconfig" -i
+            sed 's/^" \(set softtabstop\)/\1/g' "$vconfig" -i
+        fi
+
+        if [ -e "$svconfig" ]; then
+            sed 's/expand_tab.*/expand_tab = true/g' "$svconfig" -i
+        fi
+    }
+
+    function __set_width() {
+        local width="$1"
+
+        if [ -e "$vconfig" ]; then
+            sed "s/shiftwidth=[0-9]/shiftwidth=$width/g" "$vconfig" -i
+            sed "s/softtabstop=[0-9]/softtabstop=$width/g" "$vconfig" -i
+        fi
+
+        if [ -e "$svconfig" ]; then
+            sed "s/default_indent.*/default_indent = $width/g" "$svconfig" -i
+        fi
     }
 
     function __count_spaces() {
@@ -187,13 +227,13 @@ if 0 in lens and len(lens) == 1:
         local eight="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 8)"
 
         if [ ! -z "$eight" ]; then
-            sed 's/default_indent.*/default_indent = 8/g' "$config" -i
+            __set_width 8
         elif [ ! -z "$four" ]; then
-            sed 's/default_indent.*/default_indent = 4/g' "$config" -i
+            __set_width 4
         elif [ ! -z "$two" ]; then
-            sed 's/default_indent.*/default_indent = 2/g' "$config" -i
+            __set_width 2
         else
-            sed 's/default_indent.*/default_indent = 4/g' "$config" -i
+            __set_width 4
         fi
     }
 

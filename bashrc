@@ -16,7 +16,7 @@ fi
 shopt -s checkwinsize
 shopt -s globstar 2> /dev/null
 if [ -t 1 ]; then
-  bind "set show-all-if-ambiguous on"
+    bind "set show-all-if-ambiguous on"
 fi
 
 # Keep all history
@@ -158,8 +158,8 @@ for script in $HOME/.bashrc.d/*.sh; do
 done
 
 if [ ! -f "$HOME/.no_powerline" ] && [ -f "$(which powerline-daemon)" ]; then
-  powerline-daemon -q
-  POWERLINE_BASH_CONTINUATION=1
-  POWERLINE_BASH_SELECT=1
-  . /usr/share/powerline/bash/powerline.sh
+    powerline-daemon -q
+    POWERLINE_BASH_CONTINUATION=1
+    POWERLINE_BASH_SELECT=1
+    . /usr/share/powerline/bash/powerline.sh
 fi

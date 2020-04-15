@@ -63,8 +63,6 @@ function __do_install() {
         echo "Installing git..."
         cp -v gitconfig "$HOME/.gitconfig"
         mkdir -pv "$HOME/.git"
-        rm -vf "$HOME/.git/vimrc"
-        cp -v vimrc "$HOME/.git/vimrc"
     fi
 
     if [ "$do_install_vimrc" == "true" ]; then
@@ -75,7 +73,7 @@ function __do_install() {
 
     if [ "$do_install_spacevim" == "true" ]; then
         echo "Installing spacevim..."
-        rm -vf "$HOME/.SpaceVim.d/"
+        rm -vrf "$HOME/.SpaceVim.d/"
         cp -rv SpaceVim.d "$HOME/.SpaceVim.d"
     fi
 
