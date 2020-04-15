@@ -13,6 +13,7 @@ function v() {(
     shopt -s globstar
     shopt -s checkwinsize
 
+    local config="$HOME/.SpaceVim.d/init.toml"
     local reload=false
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
     local hg_root="$(hg root 2>/dev/null)"
@@ -69,7 +70,11 @@ function v() {(
 
     function __v_find_file() {
         local raw_candidate="$1"
-        local candidate="$(echo "$raw_candidate" | sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g')"
+        local candidate="$(sed 's/\(:[0-9]\+[:]*\|#[Ll_]*[0-9]\+[-]*[0-9]*\)$//g' <<< "$raw_candidate")"
+
+        if [ "x$raw_candidate" == "x-R" ]; then
+          return 1
+        fi
 
         if [ -e "$candidate" ] && [ ! -d "$candidate" ]; then
             echo "$candidate"
@@ -86,13 +91,13 @@ function v() {(
             return 0
         fi
 
-        local find="$(find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i "$candidate")"
+        local find="$(find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i -- "$candidate")"
         local find_count="$(wc -l <<< "$find")"
         if (( find_count == 1 )) && [ -e "$find" ]; then
             echo "$find"
             return 0
         elif (( find_count > 1 )); then
-            find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i "$candidate" 1>&2
+            find . -maxdepth 2 -type f 2>/dev/null | find_filter | grep -i -- "$candidate" 1>&2
             return 2
         fi
 
@@ -104,7 +109,7 @@ function v() {(
             # every time.
 
             local index_location="$(__v_compute_index)"
-            local index="$(cat "$index_location" | grep -F "$candidate")"
+            local index="$(grep -F -- "$candidate" < "$index_location")"
             local index_count="$(wc -l <<< "$index")"
 
             # Note that we have to validate that the file exists before we try
@@ -116,26 +121,26 @@ function v() {(
             fi
 
             # Try again with regex matching...
-            index="$(cat "$index_location" | grep "$candidate")"
+            index="$(grep -- "$candidate" < "$index_location")"
             index_count="$(echo "$index" | wc -l)"
             if [ "x$index_count" == "x1" ] && [ -e "$index" ]; then
                 echo "$index"
                 return 0
             elif (( index_count > 1 )); then
-                cat "$index_location" | grep "$candidate" >&2
+                grep -- "$candidate" < "$index_location" >&2
                 return 2
             fi
         fi
 
-        local glob="$(ls */"$candidate" 2>/dev/null | wc -l)"
+        local glob="$(ls ./*/"$candidate" 2>/dev/null | wc -l)"
         if [ "x$glob" == "x1" ]; then
-            ls */"$candidate"
+            ls ./*/"$candidate"
             return 0
         fi
 
-        local glob_fuzzy="$(ls */*"$candidate"* 2>/dev/null | wc -l)"
+        local glob_fuzzy="$(ls ./*/*"$candidate"* 2>/dev/null | wc -l)"
         if [ "x$glob" == "x1" ]; then
-            ls */"$candidate"
+            ls ./*/"$candidate"
             return 0
         fi
 
@@ -144,8 +149,8 @@ function v() {(
 
     function __v_line_num() {
         local candidate="$1"
-        local c_colons="$(echo "$candidate" | grep -o ':[0-9]\+[:]*$' | sed 's/://g')"
-        local c_pounds="$(echo "$candidate" | grep -o '#[Ll_]*[0-9]\+[-]*[0-9]*$' | grep -o '[0-9]*' | head -n 1)"
+        local c_colons="$(grep -o ':[0-9]\+[:]*$' <<< "$candidate" | sed 's/://g')"
+        local c_pounds="$(grep -o '#[Ll_]*[0-9]\+[-]*[0-9]*$' <<< "$candidate" | grep -o '[0-9]*' | head -n 1)"
 
         if [ "x$c_colons" != "x" ]; then
             echo "$c_colons"
@@ -158,22 +163,12 @@ function v() {(
         return 1
     }
 
-    function __preserve_whitespace() {
-        sed 's/^\(autocmd BufWritePre\)/" \1/g' ~/.vimrc -i
-    }
-
-    function __no_preserve_whitespace() {
-        sed 's/^" \(autocmd BufWritePre\)/\1/g' ~/.vimrc -i
-    }
-
     function __use_tabs() {
-        sed 's/^set expandtab/set noexpandtab/g' ~/.vimrc -i
-        sed 's/^\(set softtabstop\)/" \1/g' ~/.vimrc -i
+        sed 's/expand_tab.*/expand_tab = false/g' "$config" -i
     }
 
     function __use_spaces() {
-        sed 's/^set noexpandtab/set expandtab/g' ~/.vimrc -i
-        sed 's/^" \(set softtabstop\)/\1/g' ~/.vimrc -i
+        sed 's/expand_tab.*/expand_tab = true/g' "$config" -i
     }
 
     function __count_spaces() {
@@ -192,30 +187,18 @@ if 0 in lens and len(lens) == 1:
         local eight="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 8)"
 
         if [ ! -z "$eight" ]; then
-            sed 's/shiftwidth=[0-9]/shiftwidth=8/g' ~/.vimrc -i
-            sed 's/softtabstop=[0-9]/softtabstop=8/g' ~/.vimrc -i
+            sed 's/default_indent.*/default_indent = 8/g' "$config" -i
         elif [ ! -z "$four" ]; then
-            sed 's/shiftwidth=[0-9]/shiftwidth=4/g' ~/.vimrc -i
-            sed 's/softtabstop=[0-9]/softtabstop=4/g' ~/.vimrc -i
+            sed 's/default_indent.*/default_indent = 4/g' "$config" -i
         elif [ ! -z "$two" ]; then
-            sed 's/shiftwidth=[0-9]/shiftwidth=2/g' ~/.vimrc -i
-            sed 's/softtabstop=[0-9]/softtabstop=2/g' ~/.vimrc -i
+            sed 's/default_indent.*/default_indent = 2/g' "$config" -i
         else
-            sed 's/shiftwidth=[0-9]/shiftwidth=4/g' ~/.vimrc -i
-            sed 's/softtabstop=[0-9]/softtabstop=4/g' ~/.vimrc -i
+            sed 's/default_indent.*/default_indent = 4/g' "$config" -i
         fi
     }
 
     function __do_update_vimrc() {
         local file="$1"
-        grep -q '[[:space:]]$' "$file"
-        local ret=$?
-
-        if [ $ret == 0 ]; then
-            __preserve_whitespace
-        else
-            __no_preserve_whitespace
-        fi
 
         local count_spaces="$(grep -c '^ ' "$file" 2>/dev/null)"
         local count_tabs="$(grep -c '^	' "$file" 2>/dev/null)"
@@ -245,7 +228,7 @@ if 0 in lens and len(lens) == 1:
             reload="true"
         elif [ $path_ret == 0 ]; then
             editor_files+=("$path")
-            if [ $line_ret == 0 ]; then
+            if (( line_ret == 0 )); then
                 editor_lines+=("+$line")
             else
                 editor_lines+=("")
@@ -258,7 +241,7 @@ if 0 in lens and len(lens) == 1:
     local max_seq=${#editor_files[@]}
 
     # If we have no known files, edit the arguments anyways
-    if [ $max_seq == 0 ]; then
+    if (( max_seq == 0 )); then
         echo vim "${editor_args[@]}" 1>&2
         exec vim "${editor_args[@]}"
         return $?
