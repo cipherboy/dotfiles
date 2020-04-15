@@ -17,5 +17,5 @@ alias r8l='_rhpkg8 local'
 alias r7l='_rhpkg7 local'
 
 function getsrc() {
-    rpmspec -P *.spec | grep -i 'Source[0]*:' | awk '{print $NF}' | xargs wget
+    rpmspec -P *.spec | grep -i 'Source[0-9]*:\s*\(http\|ftp\)' | awk '{print $NF}' | xargs wget
 }
