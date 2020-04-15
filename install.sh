@@ -9,6 +9,7 @@ function __do_install() {
     local do_install_agents="false"
     local do_install_bash="false"
     local do_install_vimrc="false"
+    local do_install_spacevim="false"
     local do_install_tmux="false"
     local do_install_abcde="false"
     local do_install_git="false"
@@ -29,6 +30,8 @@ function __do_install() {
             do_install_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
             do_install_vimrc="true"
+        elif [ "x$arg" == "xspacevim" ]; then
+            do_install_spacevim="true"
         elif [ "x$arg" == "xtmux" ]; then
             do_install_tmux="true"
         elif [ "x$arg" == "xabcde" ]; then
@@ -59,12 +62,22 @@ function __do_install() {
     if [ "$do_install_git" == "true" ]; then
         echo "Installing git..."
         cp -v gitconfig "$HOME/.gitconfig"
+        mkdir -pv "$HOME/.git"
+        rm -vf "$HOME/.git/vimrc"
+        cp -v vimrc "$HOME/.git/vimrc"
     fi
 
     if [ "$do_install_vimrc" == "true" ]; then
         echo "Installing vimrc..."
         cp -v vimrc "$HOME/.vimrc"
         mkdir -pv "$HOME/.vim/swapfiles" "$HOME/.vim/spell"
+    fi
+
+    if [ "$do_install_spacevim" == "true" ]; then
+        echo "Installing spacevim..."
+        rm -vf "$HOME/.SpaceVim.d/"
+        cp -rv SpaceVim.d "$HOME/.SpaceVim.d"
+        curl -sLf https://spacevim.org/install.sh | bash
     fi
 
     if [ "$do_install_tmux" == "true" ]; then

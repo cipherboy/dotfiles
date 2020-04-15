@@ -1,7 +1,3 @@
-execute pathogen#infect()
-"
-" Plugin 'davidhalter/jedi-vim'
-
 filetype plugin indent on
 syntax on
 

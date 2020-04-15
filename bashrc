@@ -34,9 +34,9 @@ HISTCONTROL="ignoredups:erasedups"
 export HISTIGNORE="reload:exit:ls:bg:fg:history:clear"
 
 # Vim helpers
-export VISUAL=vim
+export VISUAL="vim"
 export EDITOR="$VISUAL"
-export GIT_EDITOR="$EDITOR"
+export GIT_EDITOR="vim -u /etc/vimrc"
 function vnpw() {
     sed 's/^" \(autocmd BufWritePre\)/\1/g' ~/.vimrc -i
 }
