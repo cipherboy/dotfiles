@@ -77,7 +77,6 @@ function __do_install() {
         echo "Installing spacevim..."
         rm -vf "$HOME/.SpaceVim.d/"
         cp -rv SpaceVim.d "$HOME/.SpaceVim.d"
-        curl -sLf https://spacevim.org/install.sh | bash
     fi
 
     if [ "$do_install_tmux" == "true" ]; then
