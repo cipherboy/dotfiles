@@ -10,12 +10,15 @@
 [options]
     # set spacevim theme. by default colorscheme layer is not loaded,
     # if you want to use more colorscheme, please load the colorscheme
-    # layer
-    colorscheme = "material"
-    colorscheme_bg = "term"
+    # layer. Note that the ron color scheme is default in Vim in dark
+    # terminals and must be used in order to have transparent backgrounds.
+    colorscheme = "ron"
+    colorscheme_bg = "dark"
+
     # Disable guicolors in basic mode, many terminal do not support 24bit
-    # true colors
-    enable_guicolors = true
+    # true colors. Needs to be false to enable transparent backgrounds.
+    enable_guicolors = false
+
     # Disable statusline separator, if you want to use other value, please
     # install nerd fonts
     statusline_separator = "nil"
@@ -29,27 +32,60 @@
     vimcompatible = true
     # Fix numbering
     relativenumber = false
-    # For Tabbing
+    # For tabbing
     expand_tab = true
-    default_indent = 2
+    default_indent = 4
 
 # Enable autocomplete layer
 [[layers]]
-name = 'autocomplete'
-auto_completion_return_key_behavior = "complete"
-auto_completion_tab_key_behavior = "cycle"
+    name = 'autocomplete'
+    auto_completion_return_key_behavior = "complete"
+    auto_completion_tab_key_behavior = "cycle"
 
 [[layers]]
-name = 'shell'
-default_position = 'top'
-default_height = 30
+    name = 'shell'
+    default_position = 'top'
+    default_height = 30
 
 [[layers]]
-name = 'colorscheme'
+  name = "lsp"
+  filetypes = [
+      "javascript",
+      "html",
+      "css",
+      "python",
+      "sh",
+      "go"
+  ]
 
 [[layers]]
-name = "lang#python"
-enable_typeinfo = true
+    name = 'colorscheme'
 
 [[layers]]
-name = "lang#java"
+    name = "lang#python"
+    enable_typeinfo = true
+
+[[layers]]
+    name = "lang#java"
+
+[[layers]]
+    name = "lang#c"
+    clang_executable = "/usr/bin/clang"
+    [layer.clang_std]
+        c = "c11"
+
+[[layers]]
+    name = "lang#extra"
+
+[[layers]]
+    name = "lang#go"
+
+[[layers]]
+    name = "lang#html"
+
+[[layers]]
+    name = "lang#markdown"
+    listItemIndent = "tab"
+
+[[layers]]
+    name = "lang#sh"

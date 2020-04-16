@@ -95,7 +95,7 @@ function __DEDUPE_PATH() {
     echo "$_new_path"
 }
 
-export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$PATH")"
+export PATH="$(__DEDUPE_PATH "/usr/lib64/ccache:/usr/games/bin:$HOME/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$HOME/go/bin:$PATH")"
 
 alias allpdflatex="echo *.tex | entr -r pdflatex -halt-on-error ./*.tex"
 
