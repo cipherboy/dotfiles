@@ -240,6 +240,15 @@ if 0 in lens and len(lens) == 1:
     function __do_update_vimrc() {
         local file="$1"
 
+        grep -q '[[:space:]]$' "$file"
+        local ret=$?
+
+        if [ $ret == 0 ]; then
+            __preserve_whitespace
+        else
+            __no_preserve_whitespace
+        fi
+
         local count_spaces="$(grep -c '^ ' "$file" 2>/dev/null)"
         local count_tabs="$(grep -c '^	' "$file" 2>/dev/null)"
         if (( count_spaces > count_tabs )); then
