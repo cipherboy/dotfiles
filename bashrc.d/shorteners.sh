@@ -35,6 +35,7 @@ function cr() {
         version="fedora:rawhide"
     fi
 
+    podman pull "$version" || true
     podman run --volume "$HOME/.ccache:/root/.ccache:shared" -ti "$version" /bin/bash
 }
 
