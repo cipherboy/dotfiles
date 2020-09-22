@@ -234,6 +234,10 @@ function build() {
         return 0
     }
 
+    function __build_clean_maven() {
+        mvn clean
+    }
+
     function __build_clean() {
         if [ -e "CMakeLists.txt" ] || [ -e meson.build ]; then
             __build_clean_cmake
@@ -243,6 +247,9 @@ function build() {
             return $?
         elif [ -e "setup.py" ]; then
             __build_clean_python
+            return $?
+        elif [ -e "pom.xml" ]; then
+            __build_clean_maven
             return $?
         elif [ -e "src" ]; then
             pushd src || return 1
@@ -314,6 +321,9 @@ function build() {
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
             return $?
+        elif [ -e "pom.xml" ]; then
+            # Nothing to do for maven builds.
+            return 0
         elif [ -e "Makefile" ]; then
             # If there is already a Makefile, try running it :)
             return 0
@@ -340,7 +350,12 @@ function build() {
     }
 
     function __build_python() {
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath setup.py build
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p $pypath setup.py build
+        return $?
+    }
+
+    function __build_maven() {
+        time -p maven compile
         return $?
     }
 
@@ -356,6 +371,9 @@ function build() {
         elif [ -e "setup.py" ]; then
             echo "Building with setup.py"
             __build_python
+            return $?
+        elif [ -e "pom.xml" ]; then
+            __build_maven
             return $?
         elif [ -d "build" ]; then
             pushd build || return 1
@@ -425,6 +443,11 @@ function build() {
         return $?
     }
 
+    function __build_test_maven() {
+        time -p maven test
+        return $?
+    }
+
     function __build_test() {
         if [ -e "CMakeCache.txt" ]; then
             __build_test_ctest
@@ -441,6 +464,8 @@ function build() {
             local ret=$?
             popd
             return $ret
+        elif [ -d "pom.xml" ]; then
+            __build_test_maven
         elif [ -d "src" ]; then
             pushd src || return 1
             __build_test
