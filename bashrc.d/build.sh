@@ -238,9 +238,20 @@ function build() {
         mvn clean
     }
 
+    function __build_clean_nss() {
+        rm -rf out ../dist ../nspr/{Debug,Release}
+    }
+
     function __build_clean() {
         if [ -e "CMakeLists.txt" ] || [ -e meson.build ]; then
+            # CMake must be higher priority than Makefile in case the project
+            # was built in-tree or includes other targets.
             __build_clean_cmake
+            return $?
+        elif [ -e "nss.gyp" ]; then
+            # NSS must be higher priority than Makefile because we use gyp and
+            # its build.sh script instead.
+            __build_clean_nss
             return $?
         elif [ -e "Makefile" ]; then
             __build_clean_make
@@ -359,10 +370,20 @@ function build() {
         return $?
     }
 
+    function __build_nss() {
+        time -p bash build.sh --enable-fips --enable-libpkix
+        return $?
+    }
+
     function __build() {
         if [ "x$which_ninja" != "x" ] && [ -e "build.ninja" ]; then
             echo "Building with ninja"
             __build_ninja
+            return $?
+        elif [ -e "nss.gyp" ]; then
+            # NSS must be higher priority than Makefile because we use gyp and
+            # its build.sh script instead.
+            __build_nss
             return $?
         elif [ -e "Makefile" ]; then
             echo "Building with make"
@@ -448,9 +469,25 @@ function build() {
         return $?
     }
 
+    function __build_test_nss() {
+        export HOST="localhost"
+        export DOMSUF="localdomain"
+        export USE_64=1
+        pushd tests
+        time -p bash all.sh
+        local ret=$?
+        popd
+        return $ret
+    }
+
     function __build_test() {
         if [ -e "CMakeCache.txt" ]; then
             __build_test_ctest
+            return $?
+        elif [ -e "nss.gyp" ]; then
+            # NSS must be higher priority than Makefile because we use gyp and
+            # its build.sh script instead.
+            __build_test_nss
             return $?
         elif [ -e "Makefile" ]; then
             __build_test_make
@@ -479,7 +516,7 @@ function build() {
     }
 
     function __build_rpm_script() {
-        time -p ./build.sh --with-timestamp --with-commit-id "$do_rpm"
+        time -p bash build.sh --with-timestamp --with-commit-id "$do_rpm"
     }
 
     function __build_rpm() {
