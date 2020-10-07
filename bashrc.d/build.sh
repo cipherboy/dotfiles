@@ -366,7 +366,7 @@ function build() {
     }
 
     function __build_maven() {
-        time -p maven compile
+        time -p mvn compile
         return $?
     }
 
@@ -465,7 +465,7 @@ function build() {
     }
 
     function __build_test_maven() {
-        time -p maven test
+        time -p mvn test
         return $?
     }
 
