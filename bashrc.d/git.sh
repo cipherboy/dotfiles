@@ -1,4 +1,7 @@
 # git aliases
+function gtdb() {
+    git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'
+}
 alias gta='git add'
 function gtac() {
     for file in "$@"; do
@@ -30,9 +33,13 @@ alias gtd='git diff'
 alias gtdt='git difftool'
 alias gtdc='git diff --cached'
 alias gtdh='git diff HEAD~'
-alias gtdm='git diff master'
+function gtdm() {
+    git diff "$(gtdb)"
+}
 alias gtdf='git diff --name-only'
-alias gtdfm='git diff --name-only master'
+function gtdfm() {
+    git diff --name-only "$(gtdb)"
+}
 alias gtdfh='git diff --name-only HEAD~'
 alias gtfa='git fetch --all'
 alias gtfp='git push --force'
@@ -41,10 +48,14 @@ alias gtm='git commit -s'
 alias gtma='git commit -s --amend --reset-author'
 alias gto='git checkout'
 alias gtob='git checkout -b'
-alias gtom='git checkout master'
+function gtom() {
+    git checkout "$(gtdb)"
+}
 alias gtp='git push'
-alias gtpom='git push origin master'
-alias gtpum='git push upstream master'
+alias gtpom='git push origin'
+function gtpum() {
+    git push upstream "$(gtdb)"
+}
 alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
 alias gtr='git rebase'
 alias gtra='git rebase --abort'
@@ -54,8 +65,12 @@ alias gtre='git reset'
 alias gtrh='git reset HEAD'
 alias gtrv='git remote -v'
 alias gtrr='git remote remove'
-alias gtrm='git rebase -i master'
-alias gtrma='git rebase master'
+function gtrm() {
+    git rebase -i "$(gtdb)"
+}
+function gtrma() {
+    git rebase "$(gtdb)"
+}
 alias gtrau='git remote add upstream'
 alias gtrso='git remote set-url origin'
 alias gtrsu='git remote set-url upstream'
@@ -130,8 +145,8 @@ function gthr() {
 }
 
 function gtum() {
-    # Updates the master branch
-    gtub master
+    # Updates the default branch
+    gtub "$(gtdb)"
 }
 
 function gtub() {
@@ -140,7 +155,7 @@ function gtub() {
     local local_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     local remote_branch="$1"
     if [ "$remote_branch" == "x" ]; then
-        remote_branch="master"
+        remote_branch="$(gtdb)"
     fi
 
     git checkout "$remote_branch"
@@ -318,7 +333,7 @@ function ghr() {
     fi
 
     if [ "x$branch" == "x" ]; then
-        branch="master"
+        branch="$(gtdb)"
     fi
 
     cd "$project"
@@ -327,7 +342,7 @@ function ghr() {
         return $ret
     fi
 
-    git checkout master
+    git checkout "$(gtdb)"
     git pull origin
     git checkout "$branch"
     ret="$?"
@@ -349,17 +364,17 @@ function ghl() {
     # Create a link to a given file in a smart fashion
     local path="$1"
     local line="$2"
-    local branch="master"
+    local branch="$(gtdb)"
     local url=""
 
-    # Check if file exists in master
-    git cat-file -e "master:$path" >/dev/null 2>/dev/null
+    # Check if file exists in default branch
+    git cat-file -e "$(gtdb):$path" >/dev/null 2>/dev/null
     local catret="$?"
     if (( $catret != 0 )); then
         branch="$(git rev-parse --abbrev-ref HEAD)"
     fi
 
-    if [ "x$branch" == "xmaster" ]; then
+    if [ "x$branch" == "x$(gtdb)" ]; then
         url="$(git config --get remote.upstream.url)"
         if [ "x$url" == "x" ]; then
             url="$(git config --get remote.origin.url)"
