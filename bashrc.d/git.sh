@@ -46,6 +46,7 @@ alias gtfp='git push --force'
 alias gtl='git log'
 alias gtm='git commit -s'
 alias gtma='git commit -s --amend --reset-author'
+alias gtme='git commit -s --allow-empty'
 alias gto='git checkout'
 alias gtob='git checkout -b'
 function gtom() {
