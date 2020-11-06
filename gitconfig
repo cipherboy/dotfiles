@@ -12,4 +12,10 @@
 	default = simple
 [diff]
 	tool = vimdiff
-
+[core]
+	quotePath = false
+	commitGraph = true
+[gc]
+	writeCommitGraph = true
+[pull]
+	ff = only
