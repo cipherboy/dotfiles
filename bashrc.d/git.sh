@@ -496,6 +496,11 @@ function gtrbf() {
     (gtom && gtum && gto "$branch" && gtrm && gtom && gtrb "$branch") && (gtpom ; gtpum) ; gto "$branch"
 }
 
+function gtrbfa() {
+    local branch="$(git rev-parse --abbrev-ref HEAD)"
+    (gtom && gtum && gto "$branch" && gtrma && gtom && gtr "$branch") && (gtpom ; gtpum) ; gto "$branch"
+}
+
 ## Source git completion
 if [ -f /usr/share/bash-completion/completions/git ]; then
    source /usr/share/bash-completion/completions/git
