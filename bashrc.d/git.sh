@@ -1,7 +1,33 @@
 # git aliases
 function gtdb() {
-    git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'
+    local ref=""
+    local ret=0
+
+    for remote in "$(git remote)"; do
+        ref="$(git symbolic-ref refs/remotes/"$remote"/HEAD 2>/dev/null)"
+        ret=$?
+
+        if (( ret == 0 )); then
+            sed 's@^refs/remotes/'"$remote"'/@@' <<< "$ref"
+            return $?
+        fi
+    done
+
+    for branch in main default trunk master; do
+        ref="$(git branch --list "$branch" 2>/dev/null)"
+        ret=$?
+
+        if (( ret == 0 )); then
+            if [ "x$ref" != "x" ]; then
+                echo "$branch"
+                return 0
+            fi
+        fi
+    done
+
+    return 1
 }
+
 alias gta='git add'
 function gtac() {
     for file in "$@"; do
