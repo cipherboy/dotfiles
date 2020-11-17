@@ -7,6 +7,7 @@ fi
 
 function __do_install() {
     local do_install_agents="false"
+    local do_install_ansible="false"
     local do_install_bash="false"
     local do_install_vimrc="false"
     local do_install_spacevim="false"
@@ -19,6 +20,7 @@ function __do_install() {
     for arg in "$@"; do
         if [ "x$arg" == "xall" ]; then
             do_install_agents="true"
+            do_install_ansible="true"
             do_install_bash="true"
             do_install_vimrc="true"
             do_install_tmux="true"
@@ -44,6 +46,8 @@ function __do_install() {
             do_install_tlp="true"
         elif [ "x$arg" == "xccache" ]; then
             do_install_ccache="true"
+        elif [ "x$arg" == "xansible" ]; then
+            do_install_ansible="true"
         fi
     done
 
@@ -101,6 +105,10 @@ function __do_install() {
     if [ "$do_install_agents" == "true" ]; then
         echo "Installing agents..."
         bash ./agents/*.sh
+    fi
+
+    if [ "$do_install_ansible" == "true" ]; then
+        cp -v ansible.cfg "$HOME/.ansible.cfg"
     fi
 }
 
