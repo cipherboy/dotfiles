@@ -61,8 +61,8 @@ function vssh() {
         fi
     done
 
-    echo ssh "$user"@"$addr" "${remainder[@]}"
-    ssh "$user"@"$addr" "${remainder[@]}"
+    echo ssh -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
+    ssh -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
 }
 
 function vsftp() {
@@ -93,8 +93,8 @@ function vsftp() {
         fi
     done
 
-    echo sftp "$user"@"$addr" "${remainder[@]}"
-    sftp "$user"@"$addr" "${remainder[@]}"
+    echo sftp -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
+    sftp -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
 }
 
 function vsci() {
