@@ -59,12 +59,7 @@ alias yaudio='youtube-dl -x --audio-quality 0 --audio-format best -f bestaudio'
 alias yvideo='youtube-dl -x --audio-quality 0 --audio-format best -f best -k'
 
 ## PS1
-hat='🎩︎'
-if grep -q 'redhat.com' /etc/resolv.conf; then
-    PS1="[\\u@\\h\\[\\e[31m\\]$hat\\[\\e[0m\\] \\W]\\$ "
-else
-    PS1="[\\u@\\h \\W]\\$ "
-fi
+PS1="[\\u@\\h \\W]\\$ "
 
 function __DEDUPE_PATH() {
     local _old_path="${1//:/$'\n'}"
