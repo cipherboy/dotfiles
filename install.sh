@@ -67,6 +67,16 @@ function __do_install() {
         echo "Installing git..."
         cp -v gitconfig "$HOME/.gitconfig"
         mkdir -pv "$HOME/.git"
+        if [ -e /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret.c ]; then
+            if [ ! -e /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret ]; then
+                pushd /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+                sudo apt-get install libglib2.0-dev libsecret-1-dev
+                sudo make
+                popd
+            fi
+
+            git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+        fi
     fi
 
     if [ "$do_install_vimrc" == "true" ]; then
