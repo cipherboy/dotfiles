@@ -1,11 +1,15 @@
 #!/bin/bash
 
+function svirsh() {
+    virsh -c 'qemu:///system' "$@"
+}
+
 function vm_list() {
-    sudo virsh list
+    svirsh list
 }
 
 function vm_addrs() {
-    sudo virsh domifaddr --full "$1"
+    svirsh domifaddr --full "$1"
 }
 
 function vssh_addr() {
