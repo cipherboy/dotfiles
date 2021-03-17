@@ -359,14 +359,14 @@ function ghr() {
         git clone "https://github.com/$owner/$project"
     fi
 
-    if [ "x$branch" == "x" ]; then
-        branch="$(gtdb)"
-    fi
-
     cd "$project"
     local ret="$?"
     if (( ret != 0 )); then
         return $ret
+    fi
+
+    if [ "x$branch" == "x" ]; then
+        branch="$(gtdb)"
     fi
 
     git checkout "$(gtdb)"
