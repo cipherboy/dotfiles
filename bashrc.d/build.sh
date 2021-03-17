@@ -534,7 +534,7 @@ function build() {
     }
 
     function __build_deb() {
-        if [ -e "debian/control" ] then
+        if [ -e "debian/control" ]; then
             dpkg-buildpackage -us -uc
         else
             echo "Unknown rpm system!"
