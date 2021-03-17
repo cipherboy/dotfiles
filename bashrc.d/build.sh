@@ -20,6 +20,7 @@ function build() {
     local do_build="false"
     local do_test="false"
     local do_rpm="false"
+    local do_deb="false"
     local do_popd="true"
     local use_clang="false"
     local use_afl="false"
@@ -100,6 +101,8 @@ function build() {
             do_rpm="rpm"
         elif [ "x$arg" == "xsrpm" ]; then
             do_rpm="srpm"
+        elif [ "x$arg" == "xdeb" ]; then
+            do_deb="true"
         elif [ "x$arg" == "xasan" ]; then
             cflags="$cflags -fsanitize=address"
             cxxflags="$cxxflags -fsanitize=address"
@@ -114,7 +117,7 @@ function build() {
         fi
     done
 
-    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ]; then
+    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ] && [ "$do_deb" == "false" ]; then
         do_env="true"
         do_clean="true"
         do_prep="true"
@@ -192,6 +195,7 @@ function build() {
         echo "do_build: $do_build" 1>&2
         echo "do_test: $do_test" 1>&2
         echo "do_rpm: $do_rpm" 1>&2
+        echo "do_deb: $do_deb" 1>&2
     }
 
     function __build_env_jss() {
@@ -529,6 +533,15 @@ function build() {
         fi
     }
 
+    function __build_deb() {
+        if [ -e "debian/control" ] then
+            dpkg-buildpackage -us -uc
+        else
+            echo "Unknown rpm system!"
+            return 1
+        fi
+    }
+
     function __build_uncd() {
         local cpwd="$(pwd 2>/dev/null)"
 
@@ -590,6 +603,15 @@ function build() {
         ret="$?"
         if (( ret != 0 )); then
             echo "RPM failed with status: $ret"
+            return $ret
+        fi
+    fi
+
+    if [ "$do_deb" == "true" ]; then
+        __build_deb
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "DEB failed with status: $ret"
             return $ret
         fi
     fi
