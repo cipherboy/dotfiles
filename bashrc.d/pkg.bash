@@ -16,6 +16,25 @@ alias f28l='_fedpkg28 local'
 alias r8l='_rhpkg8 local'
 alias r7l='_rhpkg7 local'
 
-function getsrc() {
+function rgetsrc() {
     rpmspec -P *.spec | grep -i 'Source[0-9]*:\s*\(http\|ftp\)' | awk '{print $NF}' | xargs wget
+}
+
+function dbdeps() {
+    local ctrl="control"
+
+    if [ ! -e "$ctrl" ]; then
+        ctrl="debian/control"
+    fi
+
+    if [ -e "$ctrl" ]; then
+        sudo mk-build-deps --install control
+    else
+        echo "Unable to find control or debian/control" 2>&1
+        return 1
+    fi
+}
+
+function dbuild() {
+    dpkg-buildpackage -us -uc
 }
