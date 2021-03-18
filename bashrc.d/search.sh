@@ -42,7 +42,7 @@ function rgif() {
     local query="${1//./\\.}"
     shift
 
-    gif "\(^\|[^0-9\.]\)$query" "$@"
+    gif "\(^\|[^0-9\.]\)$query\($\|[^0-9\.]\)" "$@"
 }
 
 function gitc() {
