@@ -37,6 +37,14 @@ function vgic() {
     v $(gic "$@" | grep -o '^[^:]*:[0-9]*:')
 }
 
+# Search for a rule/section
+function rgif() {
+    local query="${1//./\\.}"
+    shift
+
+    gif "\(^\|[^0-9\.]\)$query" "$@"
+}
+
 function gitc() {
     local query="$1"
     grep -ro "$query" | wc -l
