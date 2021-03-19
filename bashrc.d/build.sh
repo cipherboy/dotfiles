@@ -16,6 +16,7 @@ function build() {
 
     local do_env="false"
     local do_clean="false"
+    local do_cached="true"
     local do_prep="false"
     local do_build="false"
     local do_test="false"
@@ -56,11 +57,13 @@ function build() {
             do_env="true"
         elif [ "x$arg" == "xclean" ]; then
             do_clean="true"
+        elif [ "x$arg" == "xnocache" ] || [ "x$arg" == "xnocached" ]; then
+            do_cached="false"
         elif [ "x$arg" == "xprep" ]; then
             do_prep="true"
         elif [ "x$arg" == "xbuild" ]; then
             do_build="true"
-        elif [ "x$arg" == "xtest" ]; then
+        elif [ "x$arg" == "xtest" ] || [ "x$arg" == "xcheck" ]; then
             do_test="true"
         elif [ "x$arg" == "xall" ]; then
             do_env="true"
@@ -163,8 +166,13 @@ function build() {
     cmake_args+=("-DCMAKE_C_COMPILER=$ccpath"
         "-DCMAKE_CXX_COMPILER=$cxxpath"
         "-DPYTHON_EXECUTABLE=$pypath"
-        "-DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache"
     )
+
+    if [ "$do_cached" == "true" ]; then
+        cmake_args+=("-DSSG_JINJA2_CACHE_DIR=~/.ssg_jinja_cache")
+    else
+        export CCACHE_DISABLE=1
+    fi
 
     if [ "$do_test" == "true" ]; then
         cmake_args+=("-DENABLE_TESTING=ON")
