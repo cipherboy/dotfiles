@@ -13,6 +13,7 @@ set shiftround
 
 set completeopt-=preview
 autocmd BufWritePre * %s/\s\+$//e
+autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g'\"" | endif
 
 set directory=$HOME/.vim/swapfiles//
 set backupdir=$HOME/.vim/swapfiles//
