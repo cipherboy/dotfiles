@@ -121,3 +121,15 @@ function vsci() {
     echo ssh-copy-id "$user"@"$addr"
     ssh-copy-id "$user"@"$addr"
 }
+
+function mechid() {
+    dd status=none if=/dev/urandom bs=128 count=1 | md5sum | awk '{print $1}'
+}
+
+function vmechid() {
+    echo -n "Before: "
+    vssh "$@" -- cat /etc/machine-id
+    mechid | vssh "$@" -- bash -c 'cat -  > /etc/machine-id'
+    echo -n "After: "
+    vssh "$@" -- cat /etc/machine-id
+}
