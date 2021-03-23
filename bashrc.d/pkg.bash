@@ -42,3 +42,8 @@ function dbdeps() {
 function dbuild() {
     dpkg-buildpackage -us -uc
 }
+
+function apt-fetch-key() {
+    echo sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$@"
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$@"
+}
