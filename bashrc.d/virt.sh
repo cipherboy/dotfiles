@@ -38,8 +38,38 @@ function vssh_addr() {
 }
 
 function vssh() {
-    local search="$1"
-    shift
+    local search=""
+    local user="root"
+    local echo="true"
+    local seen_remainder="false"
+    local remainder=()
+
+    while (( $# > 0 )); do
+        local arg="$1"
+        shift
+
+        if [ "x$arg" == "x-l" ]; then
+            if [ "$seen_remainder" == "false" ]; then
+                user="$1"
+                shift
+            else
+                remainder+=("$arg")
+            fi
+        elif [ "x$arg" == "x--silent" ]; then
+            if [ "$seen_remainder" == "false" ]; then
+                echo="false"
+            else
+                remainder+=("$arg")
+            fi
+        elif [ "x$arg" == "--" ]; then
+            seen_remainder="true"
+            remainder+=("$arg")
+        elif [ -z "$search" ] && [ "x${arg[0]}" != "x-" ]; then
+            search="$arg"
+        else
+            remainder+=("$arg")
+        fi
+    done
 
     local addr=""
     addr="$(vssh_addr "$search")"
@@ -50,22 +80,10 @@ function vssh() {
         return 1
     fi
 
-    local user="root"
-    local remainder=()
+    if [ "$echo" == "true" ]; then
+        echo ssh -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
+    fi
 
-    while (( $# > 0 )); do
-        local arg="$1"
-        shift
-
-        if [ "x$arg" == "x-l" ]; then
-            user="$1"
-            shift
-        else
-            remainder+=("$arg")
-        fi
-    done
-
-    echo ssh -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
     ssh -o StrictHostKeyChecking=no "$user"@"$addr" "${remainder[@]}"
 }
 
@@ -128,8 +146,8 @@ function mechid() {
 
 function vmechid() {
     echo -n "Before: "
-    vssh "$@" -- cat /etc/machine-id
-    mechid | vssh "$@" -- bash -c 'cat -  > /etc/machine-id'
+    vssh --silent "$@" -- cat /etc/machine-id
+    mechid | vssh --silent "$@" -- bash -c 'cat -  > /etc/machine-id'
     echo -n "After: "
-    vssh "$@" -- cat /etc/machine-id
+    vssh --silent "$@" -- cat /etc/machine-id
 }
