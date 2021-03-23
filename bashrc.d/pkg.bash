@@ -23,12 +23,16 @@ function rgetsrc() {
 function dbdeps() {
     local ctrl="control"
 
+    if ! command -v equivs; then
+        sudo apt install equivs
+    fi
+
     if [ ! -e "$ctrl" ]; then
         ctrl="debian/control"
     fi
 
     if [ -e "$ctrl" ]; then
-        sudo mk-build-deps --install control
+        sudo mk-build-deps --install "$ctrl"
     else
         echo "Unable to find control or debian/control" 2>&1
         return 1
