@@ -24,7 +24,7 @@ function dbdeps() {
     local ctrl="control"
 
     if ! command -v equivs; then
-        sudo apt install equivs
+        sudo apt install equivs dpkg-dev build-essential quilt devscripts ubuntu-dev-tools
     fi
 
     if [ ! -e "$ctrl" ]; then
