@@ -16,5 +16,10 @@ function qip() {
 function qipa() {
     for arg in "$@"; do
         qip "$arg"
+        local ret="$?"
+        if (( ret != 0 )); then
+            echo "qip $arg returned: $ret" 1>&2
+            return $ret
+        fi
     done
 }
