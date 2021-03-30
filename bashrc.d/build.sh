@@ -21,6 +21,7 @@ function build() {
     local do_test="false"
     local do_rpm="false"
     local do_deb="false"
+    local do_sdeb="false"
     local do_popd="true"
     local use_clang="false"
     local use_afl="false"
@@ -103,6 +104,8 @@ function build() {
             do_rpm="srpm"
         elif [ "x$arg" == "xdeb" ]; then
             do_deb="true"
+        elif [ "x$arg" == "xsdeb" ]; then
+            do_sdeb="true"
         elif [ "x$arg" == "xasan" ]; then
             cflags="$cflags -fsanitize=address"
             cxxflags="$cxxflags -fsanitize=address"
@@ -117,7 +120,7 @@ function build() {
         fi
     done
 
-    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ] && [ "$do_deb" == "false" ]; then
+    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ] && [ "$do_deb" == "false" ] && [ "$do_sdeb" == "false" ]; then
         do_env="true"
         do_clean="true"
         do_prep="true"
@@ -196,6 +199,7 @@ function build() {
         echo "do_test: $do_test" 1>&2
         echo "do_rpm: $do_rpm" 1>&2
         echo "do_deb: $do_deb" 1>&2
+        echo "do_sdeb: $do_sdeb" 1>&2
     }
 
     function __build_env_jss() {
@@ -537,7 +541,16 @@ function build() {
         if [ -e "debian/control" ]; then
             dpkg-buildpackage -us -uc
         else
-            echo "Unknown rpm system!"
+            echo "Unknown deb system!"
+            return 1
+        fi
+    }
+
+    function __build_sdeb() {
+        if [ -e "debian/control" ]; then
+            debuild -S -sd -k"${DEBIAN_KEY_ID:-Scheel}"
+        else
+            echo "Unknown deb system!"
             return 1
         fi
     }
@@ -612,6 +625,15 @@ function build() {
         ret="$?"
         if (( ret != 0 )); then
             echo "DEB failed with status: $ret"
+            return $ret
+        fi
+    fi
+
+    if [ "$do_sdeb" == "true" ]; then
+        __build_sdeb
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "Source DEB failed with status: $ret"
             return $ret
         fi
     fi
