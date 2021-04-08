@@ -32,7 +32,7 @@ function vssh_addr() {
         name="$1"
     fi
 
-    local addr="$(vm_addrs "$name" | grep -o '192.168.122.[0-9]*' | head -n 1)"
+    local addr="$(vm_addrs "$name" | grep -o '192.168.122.[0-9]*' | tail -n 1)"
     echo "$addr"
     return 0
 }
