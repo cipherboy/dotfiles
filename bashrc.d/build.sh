@@ -548,7 +548,7 @@ function build() {
 
     function __build_sdeb() {
         if [ -e "debian/control" ]; then
-            debuild -S -sd -k"${DEBIAN_KEY_ID:-Scheel}"
+            debuild -S -k"${DEBIAN_KEY_ID:-Scheel}"
         else
             echo "Unknown deb system!"
             return 1
