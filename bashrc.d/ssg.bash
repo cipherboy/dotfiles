@@ -1,8 +1,17 @@
 #!/bin/bash
 
 function re() {
+    # Edit a rule.
     local rule="$1"
     v "$rule.*/rule.yml:3"
+}
+
+function nr() {
+    # Create and commit a new rule for CIS.
+    local r="$1"
+    local c="$2"
+
+    mkdir "$r" && vim "$r/rule.yml" && gta "$r" && gtm -m "Add $r for $2"
 }
 
 export PYTHONPATH="$(gtcd):$PYTHONPATH"
