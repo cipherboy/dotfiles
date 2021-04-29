@@ -147,7 +147,7 @@ function build() {
     fi
 
     if [ "$use_parallel_build" == "true" ]; then
-        local num_cores="$(grep -c '^processor[[:space:]]*:' < /proc/cpuinfo)"
+        local num_cores="$(nproc)"
         num_cores=$(( num_cores + 2 ))
         make_args+=("-j" "$num_cores")
         ninja_args+=("-j" "$num_cores")
