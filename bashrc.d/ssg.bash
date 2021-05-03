@@ -26,7 +26,7 @@ function rdir() {
 function cis() {
     # Find CIS references in a rule.
     local rule="$1"
-    local dir="$(rc "$rule")"
+    local dir="$(rdir "$rule")"
     grep 'cis@ubuntu' "$dir/rule.yml"
 }
 
@@ -36,9 +36,30 @@ function acis() {
     grep -ir "cis@ubuntu.*$identifier" "$(gtcd)" | grep -i 'rule\.yml:'
 }
 
+function new_oval() {
+    # Create a new OVAL file with the given description.
+    local description="$1"
+    shift
+
+    local platform="${1:-ubuntu}"
+    local oval="oval/$platform.xml"
+
+    mkdir oval
+
+    echo '<def-group>' > "$oval"
+    echo '  <definition class="compliance" id="{{{ rule_id }}}" version="1">' >> "$oval"
+    echo '    {{{ oval_metadata("'"$description"'") }}}' >> "$oval"
+
+    v "$oval"
+}
+
 export PYTHONPATH="$(gtcd):$PYTHONPATH"
 export PATH="$PATH:$(gtcd)/utils"
 export BUILD_CMAKE_ARGS=("-DSSG_PRODUCT_DEFAULT=OFF" "-DSSG_PRODUCT_UBUNTU2004=ON")
 
 alias ery='python3 ./tools/extract_rule_yml.py cisbenchmark/audit/Canonical_Ubuntu_20.04_CIS_Benchmark-xccdf.xml'
-alias eo='python3 ./tools/extract_oval.py cisbenchmark/audit/Canonical_Ubuntu_20.04_CIS_Benchmark-oval.xml'
+
+function eo() {
+    # Export contained OVAL from existing benchmark.
+    python3 ./tools/extract_oval.py cisbenchmark/audit/Canonical_Ubuntu_20.04_CIS_Benchmark-oval.xml "$1" | sed 's/^  //'
+}
