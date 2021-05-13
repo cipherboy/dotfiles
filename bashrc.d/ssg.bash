@@ -53,6 +53,14 @@ function new_oval() {
     v "$oval"
 }
 
+function rdj() {
+    # Generate the rule directory json mapping.
+    (
+        gtcd
+        ./utils/rule_dir_json.py
+    )
+}
+
 export PYTHONPATH="$(gtcd):$PYTHONPATH"
 export PATH="$PATH:$(gtcd)/utils"
 export BUILD_CMAKE_ARGS=("-DSSG_PRODUCT_DEFAULT=OFF" "-DSSG_PRODUCT_UBUNTU2004=ON")
