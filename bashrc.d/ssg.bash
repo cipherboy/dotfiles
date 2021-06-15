@@ -61,6 +61,16 @@ function rdj() {
     )
 }
 
+function ssgts() {
+    local mode="$1"
+    shift
+
+    (
+        gtcd && cd tests/
+        ./test_suite.py "$mode" --libvirt 'qemu:///system' 'ubuntu-20.04-cac-test' '--datastream' '../build/ssg-ubuntu2004-ds-1.2.xml' "$@"
+    )
+}
+
 export PYTHONPATH="$(gtcd):$PYTHONPATH"
 export PATH="$PATH:$(gtcd)/utils"
 export BUILD_CMAKE_ARGS=("-DSSG_PRODUCT_DEFAULT=OFF" "-DSSG_PRODUCT_UBUNTU2004=ON")

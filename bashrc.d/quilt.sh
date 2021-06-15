@@ -20,7 +20,9 @@ function qup() {
 }
 
 alias qa='qup ; quilt applied'
+alias qd='qup ; quilt delete'
 alias qi='qup ; quilt import'
+alias qp='qup ; quilt push'
 alias qs='qup ; quilt series'
 
 function qip() {
