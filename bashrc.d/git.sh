@@ -204,6 +204,13 @@ function gtub() {
     if (( ret == 0 )); then
         git pull upstream "$remote_branch"
         git reset --hard "upstream/$remote_branch"
+    else
+        gthr "internal"
+        ret="$?"
+        if (( ret == 0 )); then
+            git pull internal "$remote_branch"
+            git reset --hard "internal/$remote_branch"
+        fi
     fi
 
     git push
