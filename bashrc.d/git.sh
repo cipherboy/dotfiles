@@ -85,9 +85,10 @@ function gtpum() {
 }
 alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
 alias gtr='git rebase'
-alias gtra='git rebase --abort'
+alias gtra='git rebase --abort ; gts'
 alias gtrb='git rebase -i'
-alias gtrc='git rebase --continue'
+alias gtrc='git rebase --continue ; gts'
+alias gtrs='git rebase --skip'
 alias gtre='git reset'
 alias gtrh='git reset HEAD'
 alias gtrv='git remote -v'
