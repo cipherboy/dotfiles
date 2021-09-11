@@ -16,6 +16,7 @@ function __do_install() {
     local do_install_git="false"
     local do_install_tlp="false"
     local do_install_ccache="false"
+    local do_install_tilix="false"
 
     for arg in "$@"; do
         if [ "x$arg" == "xall" ]; then
@@ -28,6 +29,7 @@ function __do_install() {
             do_install_git="true"
             do_install_tlp="true"
             do_install_ccache="true"
+            do_install_tilix="true"
         elif [ "x$arg" == "xbash" ]; then
             do_install_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
@@ -48,6 +50,8 @@ function __do_install() {
             do_install_ccache="true"
         elif [ "x$arg" == "xansible" ]; then
             do_install_ansible="true"
+        elif [ "x$arg" == "xtilix" ]; then
+            do_install_tilix="true"
         fi
     done
 
@@ -118,7 +122,13 @@ function __do_install() {
     fi
 
     if [ "$do_install_ansible" == "true" ]; then
+        echo "Installing ansible..."
         cp -v ansible.cfg "$HOME/.ansible.cfg"
+    fi
+
+    if [ "$do_install_tilix" == "true" ]; then
+        echo "Installing tilix..."
+        dconf load /com/gexperts/Tilix/ < tilix.dconf
     fi
 }
 
