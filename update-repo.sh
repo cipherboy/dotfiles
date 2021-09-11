@@ -14,6 +14,7 @@ function __do_update() {
     local do_update_git="false"
     local do_update_tlp="false"
     local do_update_ccache="false"
+    local do_update_tilix="false"
 
     for arg in "$@"; do
         if [ "x$arg" == "xall" ]; then
@@ -25,6 +26,7 @@ function __do_update() {
             do_update_git="true"
             do_update_tlp="true"
             do_update_ccache="true"
+            do_update_tilix="true"
         elif [ "x$arg" == "xbash" ]; then
             do_update_bash="true"
         elif [ "x$arg" == "xvimrc" ]; then
@@ -41,6 +43,8 @@ function __do_update() {
             do_update_tlp="true"
         elif [ "x$arg" == "xccache" ]; then
             do_update_ccache="true"
+        elif [ "x$arg" == "xtilix" ]; then
+            do_update_tilix="true"
         fi
     done
 
@@ -84,6 +88,10 @@ function __do_update() {
         cp -v "$HOME/.ccache/ccache.conf" ccache.conf
     fi
 
+    if [ "$do_update_tilix" == "true" ]; then
+        echo "Updating tilix..."
+        dconf dump /com/gexperts/Tilix/ > tilix.dconf
+    fi
 }
 
 __do_update "$@"
