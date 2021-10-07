@@ -466,9 +466,9 @@ function gtseg() {
     # Set email globally to personal or work.
 
     local email="$1"
-    if [ "x$email" == "xwork" ]; then
+    if [ "x$email" == "xwork" ] || [ "x$email" == "xw" ]; then
         email="$(cat ~/.git_email_work)"
-    elif [ "x$email" == "personal" ]; then
+    elif [ "x$email" == "personal" ] || [ "x$email" == "xp" ]; then
         email="$(cat ~/.git_email_personal)"
     fi
     git config --global user.email "$email"
