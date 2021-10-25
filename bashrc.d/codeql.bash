@@ -20,7 +20,7 @@ function codeql-dbc() {(
         return 1
     fi
 
-    if [ "x$language" == "xgo" ]; then
+    if [ "$language" == "go" ]; then
         # Create a temporary $GOPATH to use for building
         export GOPATH="/tmp/codeql-gopath-$RANDOM-$RANDOM-$RANDOM"
         mkdir -p "$GOPATH"/{bin,src}
@@ -33,8 +33,8 @@ function codeql-dbc() {(
 
     local codeql_dir="$(__codeql-dbi "$language")"
 
-    if [ -e "$codeql_root/$codeql_dir" ] && [ "$codeql_dir" = *"dirty-$language" ]; then
-        rm -rf "$codeql_root/$codeql_dir"
+    if [ -e "$codeql_root/$codeql_dir" ] && [[ "$codeql_dir" = *"dirty-$language" ]]; then
+        rm -rf "${codeql_root:?}/${codeql_dir:?}"
     fi
 
     if [ ! -e "$codeql_root/$codeql_dir" ]; then
@@ -49,7 +49,7 @@ function codeql-query() {(
     local codeql_git="$HOME/GitHub/github/codeql"
     local codeql_go_git="$HOME/GitHub/github/codeql-go"
 
-    if [ "x$language" == "xgo" ]; then
+    if [ "$language" == "go" ]; then
         # Create a temporary $GOPATH to use for building
         export GOPATH="/tmp/codeql-gopath-$RANDOM-$RANDOM-$RANDOM"
         mkdir -p "$GOPATH"/{bin,src}
@@ -66,8 +66,8 @@ function codeql-query() {(
     fi
 
     query_path="x"
-    if [ "x$language" == "xgo" ]; then
-        pushd "$codeql_go_git/ql/src" >/dev/null
+    if [ "$language" == "go" ]; then
+        pushd "$codeql_go_git/ql/src" >/dev/null || return 1
         local num_results="$(gff -- "$query"'.*\.ql$' | wc -l)"
         if (( num_results != 1 )); then
             echo "Expected 1 result but found $num_results" 1>&2
@@ -77,9 +77,9 @@ function codeql-query() {(
 
         query_path="$(pwd)/$(gff -- "$query"'.*\.ql$')"
 
-        popd > /dev/null
+        popd > /dev/null || return 1
     else
-        pushd "$codeql_git/$language/ql/src" > /dev/null
+        pushd "$codeql_git/$language/ql/src" > /dev/null || return 1
 
         local num_results="$(gff -- "$query"'.*\.ql$' | wc -l)"
         if (( num_results != 1 )); then
@@ -91,10 +91,10 @@ function codeql-query() {(
         query_path="$(pwd)/$(gff -- "$query"'.*\.ql$')"
         echo "Set query path"
 
-        popd > /dev/null
+        popd > /dev/null || return 1
     fi
 
-    if [ "x$query_path" == "xx" ]; then
+    if [ "$query_path" == "x" ]; then
         echo "Unable to find specified query: $query!" 1>&2
         return 1
     fi
