@@ -13,7 +13,7 @@ function gtdb() {
         fi
     done
 
-    for branch in canonical main default trunk master latest devel dev development; do
+    for branch in hashicorp-main canonical main default trunk master latest devel dev development; do
         ref="$(git branch --list "$branch" 2>/dev/null)"
         ret=$?
 
