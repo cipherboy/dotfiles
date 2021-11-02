@@ -2,7 +2,7 @@
 
 function build() {
     local which_ninja="$(command -v ninja 2>/dev/null)"
-    if [ "x$which_ninja" == "x" ]; then
+    if [ "$which_ninja" == "" ]; then
         which_ninja="$(command -v ninja-build 2>/dev/null)"
     fi
 
@@ -53,72 +53,72 @@ function build() {
     fi
 
     for arg in "$@"; do
-        if [ "x$arg" == "xenv" ]; then
+        if [ "$arg" == "env" ]; then
             do_env="true"
-        elif [ "x$arg" == "xclean" ]; then
+        elif [ "$arg" == "clean" ]; then
             do_clean="true"
-        elif [ "x$arg" == "xnocache" ] || [ "x$arg" == "xnocached" ]; then
+        elif [ "$arg" == "nocache" ] || [ "$arg" == "nocached" ]; then
             do_cached="false"
-        elif [ "x$arg" == "xprep" ]; then
+        elif [ "$arg" == "prep" ]; then
             do_prep="true"
-        elif [ "x$arg" == "xbuild" ]; then
+        elif [ "$arg" == "build" ]; then
             do_build="true"
-        elif [ "x$arg" == "xtest" ] || [ "x$arg" == "xcheck" ]; then
+        elif [ "$arg" == "test" ] || [ "$arg" == "check" ]; then
             do_test="true"
-        elif [ "x$arg" == "xall" ]; then
+        elif [ "$arg" == "all" ]; then
             do_env="true"
             do_clean="true"
             do_prep="true"
             do_build="true"
             do_test="true"
-        elif [ "x$arg" == "xclang" ]; then
+        elif [ "$arg" == "clang" ]; then
             use_clang="true"
-        elif [ "x$arg" == "xdebug" ]; then
+        elif [ "$arg" == "debug" ]; then
             cmake_args+=("-DCMAKE_BUILD_TYPE=Debug")
             cflags="$cflags -Og -ggdb"
             cxxflags="$cxxflags -Og -ggdb"
-        elif [ "x$arg" == "xoptimized" ]; then
+        elif [ "$arg" == "optimized" ]; then
             cmake_args+=("-DCMAKE_BUILD_TYPE=Release")
             cflags="$cflags -O3 -march=native"
             cxxflags="$cxxflags -O3 -mtune=native"
-        elif [ "x$arg" == "xwarnings" ]; then
+        elif [ "$arg" == "warnings" ]; then
             cflags="$cflags -Wall -Wextra -Werror"
             cxxflags="$cxxflags -Wall -Wextra -Werror"
-        elif [ "x$arg" == "xmake" ]; then
+        elif [ "$arg" == "make" ]; then
             which_ninja=""
-        elif [ "x$arg" == "xserial" ]; then
+        elif [ "$arg" == "serial" ]; then
             use_parallel_build="false"
             use_parallel_tests="false"
-        elif [ "x$arg" == "xserial-build" ]; then
+        elif [ "$arg" == "serial-build" ]; then
             use_parallel_build="false"
-        elif [ "x$arg" == "xserial-tests" ]; then
+        elif [ "$arg" == "serial-tests" ]; then
             use_parallel_tests="false"
-        elif [ "x$arg" == "xpython2" ]; then
+        elif [ "$arg" == "python2" ]; then
             pypath="$py2path"
-        elif [ "x$arg" == "xpython3" ]; then
+        elif [ "$arg" == "python3" ]; then
             pypath="$py3path"
-        elif [ "x$arg" == "xnopop" ]; then
+        elif [ "$arg" == "nopop" ]; then
             do_popd="false"
-        elif [ "x$arg" == "xfuzz" ]; then
+        elif [ "$arg" == "fuzz" ]; then
             use_afl="true"
-        elif [ "x$arg" == "xrpm" ]; then
+        elif [ "$arg" == "rpm" ]; then
             do_rpm="rpm"
-        elif [ "x$arg" == "xsrpm" ]; then
+        elif [ "$arg" == "srpm" ]; then
             do_rpm="srpm"
-        elif [ "x$arg" == "xdeb" ]; then
+        elif [ "$arg" == "deb" ]; then
             do_deb="true"
-        elif [ "x$arg" == "xsdeb" ]; then
+        elif [ "$arg" == "sdeb" ]; then
             do_sdeb="true"
-        elif [ "x$arg" == "xasan" ]; then
+        elif [ "$arg" == "asan" ]; then
             cflags="$cflags -fsanitize=address"
             cxxflags="$cxxflags -fsanitize=address"
-        elif [ "x$arg" == "xlsan" ]; then
+        elif [ "$arg" == "lsan" ]; then
             cflags="$cflags -fsanitize=leak"
             cxxflags="$cxxflags -fsanitize=leak"
-        elif [ "x$arg" == "xubsan" ]; then
+        elif [ "$arg" == "ubsan" ]; then
             cflags="$cflags -fsanitize=undefined -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=object-size -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=nonnull-attribute -fsanitize=returns-nonnull-attribute -fsanitize=bool -fsanitize=enum -fsanitize=vptr -fsanitize=pointer-overflow -fsanitize=builtin"
             cxxflags="$cflags -fsanitize=undefined -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=object-size -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=nonnull-attribute -fsanitize=returns-nonnull-attribute -fsanitize=bool -fsanitize=enum -fsanitize=vptr -fsanitize=pointer-overflow -fsanitize=builtin"
-        elif [ "x$arg" == "xssg-rhel" ]; then
+        elif [ "$arg" == "ssg-rhel" ]; then
             cmake_args+=("-DSSG_PRODUCT_DEFAULT=OFF" "-DSSG_PRODUCT_RHEL7=ON" "-DSSG_PRODUCT_RHEL8=ON")
         fi
     done
@@ -131,14 +131,14 @@ function build() {
     fi
 
     # Set ccpath/cxxpath based on arguments provided
-    if [ "$use_afl" == "true" ] && [ "x$which_afl_fuzz" != "x" ] && [ "$use_clang" == "false" ]; then
+    if [ "$use_afl" == "true" ] && [ "$which_afl_fuzz" != "" ] && [ "$use_clang" == "false" ]; then
         ccpath="$which_afl_gcc"
         cxxpath="$which_afl_gpp"
-    elif [ "$use_afl" == "true" ] && [ "x$which_afl_fuzz" != "x" ] && [ "$use_clang" == "true" ]; then
+    elif [ "$use_afl" == "true" ] && [ "$which_afl_fuzz" != "" ] && [ "$use_clang" == "true" ]; then
         ccpath="$which_afl_clang"
         cxxpath="$which_afl_clangpp"
     elif [ "$use_clang" == "true" ]; then
-        if [ "x$which_clang" != "x" ] && [ "x$which_clangpp" != "x" ]; then
+        if [ "$which_clang" != "" ] && [ "$which_clangpp" != "" ]; then
             ccpath="$which_clang"
             cxxpath="$which_clangpp"
         fi
@@ -179,11 +179,11 @@ function build() {
     fi
 
     function __build_cd() {
-        if [ "x$git_root" == "x" ]; then
+        if [ "$git_root" == "" ]; then
             return
         fi
 
-        if [ "x$starting_dir" != "x$git_root" ]; then
+        if [ "$starting_dir" != "$git_root" ]; then
             cd "$git_root" || return
         fi
     }
@@ -211,7 +211,7 @@ function build() {
     }
 
     function __build_env_jss() {
-        if [ "x$JAVA_HOME" == "x" ] && [ -e tools/autoenv.sh ]; then
+        if [ "$JAVA_HOME" == "" ] && [ -e tools/autoenv.sh ]; then
             source tools/autoenv.sh
             return $?
         fi
@@ -282,7 +282,7 @@ function build() {
             pushd src || return 1
             __build_clean
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         fi
         return 0
@@ -303,7 +303,7 @@ function build() {
             cd build || return 1
         fi
 
-        if [ "x$which_ninja" == "x" ]; then
+        if [ "$which_ninja" == "" ]; then
             echo "Prepping with cmake/make"
             __build_prep_cmake_make
             return $?
@@ -360,10 +360,10 @@ function build() {
             __build_prep_make_bootstrap
             return $?
         elif [ -d "src" ]; then
-            pushd src || return
+            pushd src || return 1
             __build_prep
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         else
             echo "Cannot build prep: unknown build system"
@@ -397,7 +397,7 @@ function build() {
     }
 
     function __build() {
-        if [ "x$which_ninja" != "x" ] && [ -e "build.ninja" ]; then
+        if [ "$which_ninja" != "" ] && [ -e "build.ninja" ]; then
             echo "Building with ninja"
             __build_ninja
             return $?
@@ -421,13 +421,13 @@ function build() {
             pushd build || return 1
             __build
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         elif [ -d "src" ]; then
             pushd src || return 1
             __build
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         else
             echo "Unknown build system!"
@@ -473,7 +473,7 @@ function build() {
 
     function __build_test_python() {
         if [ -d tests ]; then
-            if [ "x$pypath" == "$py2path" ]; then
+            if [ "$pypath" == "$py2path" ]; then
                 time -p pytest
                 return $?
             else
@@ -494,10 +494,10 @@ function build() {
         export HOST="localhost"
         export DOMSUF="localdomain"
         export USE_64=1
-        pushd tests
+        pushd tests || return 1
         time -p bash all.sh
         local ret=$?
-        popd
+        popd || return 1
         return $ret
     }
 
@@ -520,7 +520,7 @@ function build() {
             pushd build || return 1
             __build_test
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         elif [ -d "pom.xml" ]; then
             __build_test_maven
@@ -528,7 +528,7 @@ function build() {
             pushd src || return 1
             __build_test
             local ret=$?
-            popd
+            popd || return 1
             return $ret
         else
             echo "Unknown test system!"
@@ -571,7 +571,7 @@ function build() {
     function __build_uncd() {
         local cpwd="$(pwd 2>/dev/null)"
 
-        if [ "x$cpwd" != "x" ] && [ "x$cpwd" != "x$starting_dir" ]; then
+        if [ "$cpwd" != "" ] && [ "$cpwd" != "$starting_dir" ]; then
             cd "$starting_dir" || return
         fi
     }
