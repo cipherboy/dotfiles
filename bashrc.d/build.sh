@@ -336,6 +336,10 @@ function build() {
         return $?
     }
 
+    function __build_prep_make_bootstrap() {
+        time -p make bootstrap
+    }
+
     function __build_prep() {
         if [ -e "CMakeLists.txt" ]; then
             __build_prep_cmake
@@ -353,7 +357,8 @@ function build() {
             return 0
         elif [ -e "Makefile" ]; then
             # If there is already a Makefile, try running it :)
-            return 0
+            __build_prep_make_bootstrap
+            return $?
         elif [ -d "src" ]; then
             pushd src || return
             __build_prep
