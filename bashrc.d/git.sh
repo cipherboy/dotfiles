@@ -78,10 +78,14 @@ alias gtob='git checkout -b'
 function gtom() {
     git checkout "$(gtdb)"
 }
-alias gtp='git push'
-alias gtpom='git push origin'
+function gtp() {
+    git push "$@"
+}
+function gtpom() {
+    gtp origin "$@"
+}
 function gtpum() {
-    git push upstream "$(gtdb)"
+    gtp "upstream" "$(gtdb)"
 }
 alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
 alias gtr='git rebase'
@@ -542,6 +546,24 @@ function gtrbf() {
 function gtrbfa() {
     local branch="$(git rev-parse --abbrev-ref HEAD)"
     (gtom && gtum && gto "$branch" && gtrma && gtom && gtr "$branch") && (gtpom ; gtpum) ; gto "$branch"
+}
+
+function __gtp-hashicorp() {
+    # Hashicorp prefers employees push directly to the core repository rather
+    # than open pull requests across forks. This helper enables the fork
+    # workflow, while transparently cluttering the main repository to mirror
+    # internal preferences.
+    local prefix="ascheel"
+    local separator="-"
+    local branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+
+    for remote in $(git remote); do
+        if [[ "$(git remote get-url "$remote")" != *"github.com/hashicorp/"* ]]; then
+            continue
+        fi
+
+        git push --force "$remote" "$branch:$prefix$separator$branch" >/dev/null 2>/dev/null
+    done
 }
 
 ## Source git completion
