@@ -395,6 +395,41 @@ function ghr() {
     build all
 }
 
+function ghpr() {
+    local number="$1"
+    local branch="$2"
+
+    if [ -z "$branch" ]; then
+        branch="pr-$number"
+    fi
+
+    git rev-parse "$branch" >/dev/null 2>/dev/null
+    exists=$?
+    if (( exists == 0 )); then
+        echo "Updating branch $name..."
+        git checkout "$branch"
+    fi
+
+    for remote in $(git remote); do
+        git fetch "$remote" "pull/$number/head" >/dev/null 2>/dev/null
+        ret=$?
+
+        if (( ret != 0 )); then
+            continue
+        fi
+
+        if (( exists == 0 )); then
+            git reset --hard FETCH_HEAD
+        else
+            git checkout -b "$branch" FETCH_HEAD
+        fi
+
+        return
+    done
+
+    echo "No remotes matching this pull request exist: $number" 1>&2
+}
+
 function ghl() {
     # Create a link to a given file in a smart fashion
     local path="$1"
