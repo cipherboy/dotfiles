@@ -302,8 +302,16 @@ if 0 in lens and len(lens) == 1:
     for i in $(seq 0 ${#editor_files[@]}); do
         local file="${editor_files[$i]}"
         local line="${editor_lines[$i]}"
+        local gofmt_clean="true"
 
         __do_update_vimrc "$file"
+
+        if [[ "$file" == *".go" ]] && command -v gofmt >/dev/null; then
+            local gofmt="$(gofmt -l -d "$file" 2>&1 | wc -l)"
+            if (( gofmt > 0 )); then
+                gofmt_clean="false"
+            fi
+        fi
 
         (
             echo vim "${editor_args[@]}" $line "$file" 1>&2
@@ -312,6 +320,11 @@ if 0 in lens and len(lens) == 1:
         ret=$?
         if [ $ret != 0 ]; then
             return $ret
+        fi
+
+        if [[ "$file" == *".go" ]] && command -v gofmt >/dev/null && [ "$gofmt_clean" == "true" ]; then
+            echo gofmt -l -w "$file" 1>&2
+            gofmt -l -w "$file"
         fi
 
         if [ "x$((i + 1))" == "x${#editor_files[@]}" ]; then
