@@ -214,24 +214,30 @@ function v() {(
 
     function __count_spaces() {
         local k="$1"
-
-        python3 -c "import sys; k = $k; lens = set(map(lambda x: (len(x) - 1) % k, sys.stdin.readlines()))
-if 0 in lens and len(lens) == 1:
-    print(k)"
+        # This python one-liner takes input in the form occurrences -> length
+        # (from the awk output in __detect_spaces) and returns True iff the
+        # selected k value is the most common divisor of the line length.
+        # This is better than the earlier function which didn't weight by line
+        # length occurrence.
+        python3 -c "import collections, sys ; k=$k ; result = collections.defaultdict(lambda: 0)
+for z in map(lambda y: ( y[1] % k, y[0] ), (map(lambda x: tuple(map(int, x.strip().split(' '))), sys.stdin.readlines()))):
+    result[z[0]] += z[1]
+print(result[0] == max(result.values()))"
     }
 
     function __detect_spaces() {
         local file="$1"
 
-        local two="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 2)"
-        local four="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 4)"
-        local eight="$(grep -o '^[ ]*' "$file" | sort -u | __count_spaces 8)"
+        local spaces="$(grep -o '^[ ]*' "$file" | awk '{ print length($0) }' | sort | uniq -c)"
+        local two="$(__count_spaces 2 <<< "$spaces")"
+        local four="$(__count_spaces 4 <<< "$spaces")"
+        local eight="$(__count_spaces 8 <<< "$spaces")"
 
-        if [ ! -z "$eight" ]; then
+        if [ "$eight" == "True" ]; then
             __set_width 8
-        elif [ ! -z "$four" ]; then
+        elif [ "$four" == "True" ]; then
             __set_width 4
-        elif [ ! -z "$two" ]; then
+        elif [ "$two" == "True" ]; then
             __set_width 2
         else
             __set_width 4
