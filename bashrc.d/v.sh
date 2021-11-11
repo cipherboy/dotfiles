@@ -35,6 +35,7 @@ function v() {(
         sed '/\.pyc$/d' |
         sed '/\/target\//d' |
         sed '/\/node_modules\//d' |
+        sed '/\/vendor\//d' |
         sed '/\/\.jar$/d' |
         sed '/\/\.class$/d'
     }
