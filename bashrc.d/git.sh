@@ -43,7 +43,7 @@ function gtac() {
 alias gtb='git branch  --sort=committerdate'
 function gtbc() {
     local commit="$1"
-    git branch --all --contains "$commit"  --sort=committerdate | sed 's#/# #g' | awk '{print $NF}' | sort -u
+    git branch --all --contains "$commit"  --sort=committerdate | sed 's#remotes/[^/]*/# #g' | awk '{print $NF}' | sort -u
 }
 alias gtbn='basename "$(gtcd)"'
 alias gtc='git clone'
