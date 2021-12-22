@@ -337,7 +337,10 @@ function build() {
     }
 
     function __build_prep_make_bootstrap() {
-        time -p make bootstrap
+        make -q bootstrap
+        if (( $? == 0 )); then
+            time -p make bootstrap
+        fi
     }
 
     function __build_prep() {
