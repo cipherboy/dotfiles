@@ -204,17 +204,17 @@ function gtub() {
 
     git pull origin "$remote_branch"
 
-    gthr "upstream"
+    gthr "internal"
     ret="$?"
     if (( ret == 0 )); then
-        git pull upstream "$remote_branch"
-        git reset --hard "upstream/$remote_branch"
+        git pull internal "$remote_branch"
+        git reset --hard "internal/$remote_branch"
     else
-        gthr "internal"
+        gthr "upstream"
         ret="$?"
         if (( ret == 0 )); then
-            git pull internal "$remote_branch"
-            git reset --hard "internal/$remote_branch"
+            git pull upstream "$remote_branch"
+            git reset --hard "upstream/$remote_branch"
         fi
     fi
 
