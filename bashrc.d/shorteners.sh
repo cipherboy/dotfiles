@@ -155,8 +155,17 @@ function tcd() {
         done
     fi
 
+    local do_ls="false"
+    if [ -e "$HOME/tmp/$num" ]; then
+        do_ls="true"
+    fi
+
     mkdir -p "$HOME/tmp/$num" 2>/dev/null
     pushd "$HOME/tmp/$num"
+
+    if [ "$do_ls" == "true" ]; then
+        ls
+    fi
 }
 
 # sort | uniq -c | sort -n
