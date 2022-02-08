@@ -161,7 +161,14 @@ function gtff() {
     local abspath="$(gtcd)"
     local relpath="$(realpath --relative-to="$(pwd)" "$abspath")"
 
-    find "$relpath" -path '*/build/*' -prune -path '*.git*' -prune -o -print | grep -i "$@"
+    find "$relpath" '(' \
+        -path '*/build/*' -o \
+        -path '*/.git*' -o \
+        -path '*/.hg/*' -o \
+        -path '*/.mypy_cache/*' \
+        -o -path '*/.pytest_cache/*' \
+        -o -path '*/node_modules/*' \
+    ')' -prune -o -print | grep -i "$@"
 }
 
 function gthr() {
