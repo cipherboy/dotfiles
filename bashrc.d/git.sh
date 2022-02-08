@@ -168,6 +168,7 @@ function gtff() {
         -path '*/.mypy_cache/*' \
         -o -path '*/.pytest_cache/*' \
         -o -path '*/node_modules/*' \
+        -o -path '*/.yarn/*' \
     ')' -prune -o -print | grep -i "$@"
 }
 

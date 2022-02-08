@@ -1,16 +1,16 @@
 # grep aliases
-GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache --exclude-dir=node_modules"
+GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache --exclude-dir=node_modules --exclude-dir=.yarn --exclude=*chunk*.js --exclude=*chunk*.js.map"
 alias gir="grep $GREP_EXCLUDE -iIr"
 alias gic="grep $GREP_EXCLUDE -nIHr"
 alias gif="grep $GREP_EXCLUDE -iInHr"
 alias gih="grep --include=*.h -nir"
 alias gig="grep --include=*.go -nir"
 alias gin="grep $GREP_EXCLUDE -iHrl"
-alias gff="find . ( -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' ) -prune -o -print | grep -i"
+alias gff="find . ( -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' -o -path '*/.yarn/*' ) -prune -o -print | grep -i"
 
 function vgff() {
     local query="$1"
-    for file in $(find . '(' -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' ')' -prune -o -print | grep -i "$query"); do
+    for file in $(find . '(' -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' -o -path '*/.yarn/*' ')' -prune -o -print | grep -i "$query"); do
         if [ -f "$file" ]; then
             vi "$file"
         fi
