@@ -6,7 +6,7 @@ alias gif="grep $GREP_EXCLUDE -iInHr"
 alias gih="grep --include=*.h -nir"
 alias gig="grep --include=*.go -nir"
 alias gin="grep $GREP_EXCLUDE -iHrl"
-alias gff="find . ( -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' -o -path '*/.yarn/*' ) -prune -o -print | grep -i"
+alias gff="find . \( -path '*/build/*' -o -path '*/.git*' -o -path '*/.hg/*' -o -path '*/.mypy_cache/*' -o -path '*/.pytest_cache/*' -o -path '*/node_modules/*' -o -path '*/.yarn/*' \) -prune -o -print | grep -i"
 
 function vgff() {
     local query="$1"
