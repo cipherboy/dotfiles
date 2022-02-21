@@ -164,3 +164,160 @@ function ccpy() {
         done
     popd
 }
+
+function getnextseries() {
+    local path="$1"
+    local filename="$(basename "$path")"
+    local directory="$(dirname "$path")"
+    local name="${filename/.jpg/}"
+    if ! grep -q '[[:digit:]]\+$' <<< "$name"; then
+        return 1
+    fi
+
+    local number="$(grep -o '[[:digit:]]\+$' <<< "$name")"
+    local nextnumber=$(( number + 1 ))
+
+    if [ "$directory" != "." ]; then
+        echo -n "$directory/"
+    fi
+    echo -n "${name/$number/}"
+    echo -n "$nextnumber"
+    echo ".jpg"
+}
+
+function baseseries() {
+    local path="$1"
+    local filename="$(basename "$path")"
+    local directory="$(dirname "$path")"
+    local name="${filename/.jpg/}"
+    if ! grep -q '[[:digit:]]\+$' <<< "$name"; then
+        return 1
+    fi
+
+    local number="$(grep -o '[[:digit:]]\+$' <<< "$name")"
+    local nextnumber=$(( number + 1 ))
+    echo -n "${name/-$number/}"
+}
+
+function startseries() {
+    local path="$1"
+    echo "${path/.jpg/-1.jpg}"
+}
+
+function getcopyname() {
+    local path="$1"
+    local destination="$2"
+
+    local src_size="$(stat --printf="%s" "$path")"
+    local src_hash=""
+
+    local series="$(baseseries "$path")"
+    for count in `seq 1 1000`; do
+        local dest_path="$destination/$series-$count.jpg"
+        if [ ! -e "$dest_path" ]; then
+            echo "$series-$count.jpg"
+            return 0
+        fi
+
+        local dest_size="$(stat --printf="%s" "$dest_path")"
+        if [ "$src_size" == "$dest_size" ]; then
+            if [ -z "$src_hash" ]; then
+                src_hash="$(openssl md5 -hex < "$path")"
+            fi
+
+            local dest_hash="$(openssl md5 -hex < "$dest_path")"
+            if [ "$src_hash" == "$dest_hash" ]; then
+                return 1
+            fi
+        fi
+    done
+
+    return 1
+}
+
+function copynext() {
+    local source="$1"
+    local dest="$2"
+
+    if [ ! -d "$source" ] || [ ! -d "$dest" ]; then
+        echo "Usage: copynext /path/to/sourcedir /path/to/destdir" 1>&2
+        return 1
+    fi
+
+    for path in "$source"/*; do
+        if [ ! -f "$path" ]; then
+            echo "Skipping non-file $path..."
+            continue
+        fi
+
+        local filename="$(basename "$path")"
+        if [ -e "$dest/$filename" ]; then
+            local next="$(getnextseries "$filename")"
+            local copy="true"
+            if [ -z "$next" ]; then
+                local source_digest="$(openssl md5 -hex < "$path")"
+                local dest_digest="$(openssl md5 -hex < "$dest/$filename")"
+                if [ "$source_digest" != "$dest_digest" ]; then
+                    # File already exists; copy to series and then increment.
+                    local series_start="$(startseries "$filename")"
+                    mv -v "$dest/$filename" "$dest/$series_start"
+
+                    next="$(getnextseries "$series_start")"
+                else
+                    # Exists
+                    copy="false"
+                fi
+            else
+                next="$(getcopyname "$path" "$dest")"
+                if [ -z "$next" ]; then
+                    # Exists
+                    copy="false"
+                fi
+            fi
+
+            if [ "$copy" == "true" ]; then
+                cp -v "$source/$filename" "$dest/$next"
+            fi
+        else
+            cp -v "$path" "$dest/$filename"
+        fi
+    done
+}
+
+function copyunique() {
+    local source="$1"
+    local dest="$2"
+
+    if [ ! -d "$source" ] || [ ! -d "$dest" ]; then
+        echo "Usage: copyunique /path/to/sourcedir /path/to/destdir" 1>&2
+        return 1
+    fi
+
+    for source_path in "$source"/*; do
+        if [ ! -f "$source_path" ]; then
+            echo "Skipping non-file $source_path..."
+            continue
+        fi
+
+        local source_size="$(stat --printf="%s" "$source_path")"
+        local source_hash="$(openssl md5 -hex < "$source_path")"
+        local found_source="false"
+        for dest_path in "$dest"/*; do
+            local dest_size="$(stat --printf="%s" "$dest_path")"
+            if [ "$source_size" != "$dest_size" ]; then
+                continue
+            fi
+
+            local dest_hash="$(openssl md5 -hex < "$dest_path")"
+            if [ "$dest_hash" == "$source_hash" ]; then
+                found_source="true"
+                break
+            fi
+        done
+
+        if [ "$found_source" == "false" ]; then
+            local filename="$(basename "$source_path")"
+            cp -v "$source_path" "$dest/$filename"
+        fi
+    done
+}
