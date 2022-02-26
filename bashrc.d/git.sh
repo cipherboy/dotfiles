@@ -88,6 +88,7 @@ function gtpum() {
     gtp "upstream" "$(gtdb)"
 }
 alias gtpsu='git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)'
+alias gtpob='git push origin $(git rev-parse --abbrev-ref HEAD):cipherboy-$(git rev-parse --abbrev-ref HEAD)'
 alias gtpub='git push upstream $(git rev-parse --abbrev-ref HEAD):cipherboy-$(git rev-parse --abbrev-ref HEAD)'
 alias gtr='git rebase'
 alias gtra='git rebase --abort ; gts'
