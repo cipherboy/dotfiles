@@ -319,14 +319,20 @@ function build() {
     }
 
     function __build_prep_autotools() {
-        if [ ! -e "configure" ]; then
+        if [ ! -e "configure" ] && [ ! -e "config" ] && [ ! -e "Configure" ]; then
             if [ -e autogen.sh ]; then
                 time -p ./autogen.sh
             else
                 time -p autoreconf -f -i
             fi
         fi
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p ./configure
+        local path="./configure"
+        if [ -e "./config" ]; then
+            path="./config"
+        elif [ -e "./Configure" ]; then
+            path="./Configure"
+        fi
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p "$path"
         return $?
     }
 
@@ -349,7 +355,7 @@ function build() {
             return $?
         elif [ -e "meson.build" ]; then
             __build_prep_meson
-        elif [ -e "configure.ac" ] || [ -e "configure.in" ]; then
+        elif [ -e "configure.ac" ] || [ -e "configure.in" ] || [ -e "configure" ] || [ -e "config" ] || [ -e "Configure" ]; then
             __build_prep_autotools
             return $?
         elif [ -e "setup.py" ]; then
