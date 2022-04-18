@@ -28,6 +28,7 @@ function build() {
     local use_afl="false"
     local use_parallel_build="true"
     local use_parallel_tests="true"
+    local config_args=()
     local cmake_args=()
     local make_args=()
     local ninja_args=()
@@ -42,6 +43,9 @@ function build() {
     local starting_dir="$(pwd 2>/dev/null)"
     local git_root="$(git rev-parse --show-toplevel 2>/dev/null)"
 
+    if (( ${#BUILD_CONFIGURE_ARGS[@]} > 0 )); then
+        config_args=("${BUILD_CONFIGURE_ARGS[@]}")
+    fi
     if (( ${#BUILD_CMAKE_ARGS[@]} > 0 )); then
         cmake_args=("${BUILD_CMAKE_ARGS[@]}")
     fi
@@ -196,6 +200,7 @@ function build() {
         echo "cxx path: $cxxpath" 1>&2
         echo "cxxflags: $cxxflags" 1>&2
         echo "python path: $pypath" 1>&2
+        echo "config args:" "${config_args[@]}"
         echo "cmake args:" "${cmake_args[@]}"
         echo "make args:" "${make_args[@]}"
         echo "ninja args:" "${ninja_args[@]}"
@@ -332,7 +337,7 @@ function build() {
         elif [ -e "./Configure" ]; then
             path="./Configure"
         fi
-        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p "$path"
+        CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p "$path" "${config_args[@]}"
         return $?
     }
 
