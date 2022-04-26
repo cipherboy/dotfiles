@@ -520,15 +520,23 @@ if [ -f /usr/share/bash-completion/completions/git ]; then
     __git_complete gtc _git_clone
     __git_complete gtcp _git_cherry_pick
     __git_complete gtd _git_diff
+    __git_complete gtdh _git_diff
     __git_complete gtdf _git_diff
+    __git_complete gtdfh _git_diff
     __git_complete gtl _git_log
     __git_complete gtm _git_commit
     __git_complete gtma _git_commit
+    __git_complete gtme _git_commit
     __git_complete gto _git_checkout
     __git_complete gtob _git_checkout
     __git_complete gtp _git_push
+    __git_complete gtpom _git_push
+    __git_complete gtpum _git_push
+    __git_complete gtpsu _git_push
+    __git_complete gtpob _git_push
+    __git_complete gtpub _git_push
     __git_complete gtr _git_rebase
-    __git_complete gtri _git_rebase
+    __git_complete gtrb _git_rebase
     __git_complete gtre _git_reset
     __git_complete gtsl _git_shortlog
     __git_complete gtu _git_pull
