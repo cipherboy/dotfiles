@@ -181,3 +181,9 @@ function pskill() {
 
 # Do a lot of builds
 alias badwc="build all warnings debug && build all warnings debug clang && build all && build all clang"
+
+# Use Podman over Docker
+function use_podman() {
+    systemctl --user enable --now podman.socket
+    export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
+}
