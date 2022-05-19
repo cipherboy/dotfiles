@@ -39,3 +39,41 @@ function gh_keys() {
 
     curl "https://api.github.com/users/$user/keys" 2>/dev/null | jq -r '.[].key' | sed "s/\$/ github-$user/g"
 }
+
+function gh_vault_artifact() {
+    local pr="$1"
+    local repo="${2:-$(basename "$(gtrv | head -n 1 | awk '{print $2}')")}"
+    local artifact_selector="${3:-linux_amd64.zip}"
+
+    if [ -z "$repo" ]; then
+        echo "unable to detect repo; provide it in \$2"
+    fi
+    tcd
+
+    (
+        set -euxo pipefail
+
+        mkdir .apis/
+        local repo_url="https://api.github.com/repos/hashicorp/$repo/pulls/$pr"
+        curl -sSL "$repo_url" > .apis/repo
+        local commits_url="$(jq -r '.commits_url' .apis/repo)"
+        curl -sSL "$commits_url" > .apis/commits
+        local last_commit="$(jq -r '.[-1].sha' .apis/commits)"
+        local check_runs_url="https://api.github.com/repos/hashicorp/$repo/commits/$last_commit/check-runs"
+        curl -sSL "$check_runs_url" > .apis/check_runs
+        local check_run_id="$(jq -r '.check_runs[] | select(.name | endswith("linux amd64 build")).id' .apis/check_runs)"
+        local check_run_url="https://github.com/hashicorp/$repo/runs/$check_run_id?check_suite_focus=true"
+        curl -sSL "$check_run_url" > .apis/check-run.html
+        local action_id="$(grep -io '/actions/runs/[0-9]*' .apis/check-run.html | sort -u | head -n 1 | grep -o '[0-9]*')"
+        local artifacts_url="https://api.github.com/repos/hashicorp/$repo/actions/runs/$action_id/artifacts"
+        curl -u "${GITHUB_USERNAME:-cipherboy}" -sSL "$artifacts_url" > .apis/artifacts
+        local artifact_url="$(jq -r '.artifacts[] | select(.name | endswith("'"$artifact_selector"'")).archive_download_url' .apis/artifacts)"
+        mkdir .artifacts/
+        curl -u "${GITHUB_USERNAME:-cipherboy}" -sSL "$artifact_url" > .artifacts/archive.zip
+        unzip .artifacts/archive.zip
+    )
+
+    if [ -e *.zip ]; then
+        unzip *.zip
+    fi
+}
