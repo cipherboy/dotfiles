@@ -5,11 +5,17 @@ if [ -e /etc/profile ]; then
 fi
 
 for i in /etc/profile.d/*.sh; do
-    source $i
+    if cat "$i" >/dev/null 2>/dev/null ; then
+        source $i
+    fi
 done
 
-if [ "$TILIX_ID" ] || [ "$VTE_VERSION" ]; then
-    source /etc/profile.d/vte.sh
+if [ -n "$TILIX_ID" ] || [ -n "$VTE_VERSION" ]; then
+    if [ -e /etc/profile.d/vte.sh ]; then
+        source /etc/profile.d/vte.sh
+    elif [ -e /etc/profile.d/vte-2.91.sh ]; then
+        source /etc/profile.d/vte-2.91.sh
+    fi
 fi
 
 # Shell Options
