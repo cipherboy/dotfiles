@@ -283,6 +283,13 @@ function build() {
         elif [ -e "pom.xml" ]; then
             __build_clean_maven
             return $?
+		elif [ -e "clean.bash" ]; then
+			if [ -e "../bin" ] && [ ! -e "../bin/go" ]; then
+				echo "Nothing to clean in Go build system"
+				return 0
+			fi
+			bash clean.bash
+			return $?
         elif [ -e "src" ]; then
             pushd src || return 1
             __build_clean
@@ -373,6 +380,8 @@ function build() {
             # If there is already a Makefile, try running it :)
             __build_prep_make_bootstrap
             return $?
+		elif [ -e "run.bash" ] && [ -e "make.bash" ] && [ -e "clean.bash" ]; then
+			return 0
         elif [ -d "src" ]; then
             pushd src || return 1
             __build_prep
@@ -431,6 +440,9 @@ function build() {
         elif [ -e "pom.xml" ]; then
             __build_maven
             return $?
+		elif [ -e "make.bash" ]; then
+			bash make.bash
+			return $?
         elif [ -d "build" ]; then
             pushd build || return 1
             __build
@@ -538,6 +550,10 @@ function build() {
             return $ret
         elif [ -d "pom.xml" ]; then
             __build_test_maven
+			return $?
+		elif [ -e "run.bash" ]; then
+			bash run.bash
+			return $?
         elif [ -d "src" ]; then
             pushd src || return 1
             __build_test
