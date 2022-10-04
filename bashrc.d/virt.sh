@@ -1,7 +1,9 @@
 #!/bin/bash
 
+export VIRT_ADDR="${VIRT_ADDR:-qemu:///system}"
+
 function svirsh() {
-    virsh -c 'qemu:///system' "$@"
+    virsh -c "$VIRT_ADDR" "$@"
 }
 
 function vm_list() {
