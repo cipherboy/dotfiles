@@ -187,3 +187,18 @@ function use_podman() {
     systemctl --user enable --now podman.socket
     export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 }
+
+# Run go test, but for hashicorp vault.
+function vgt() {
+    local args=()
+    for arg in "$@"; do
+        local shortened="${arg#./.../}"
+        if [ "$shortened" == "$arg" ]; then
+            args+=("$arg")
+        else
+            args+=("github.com/hashicorp/vault/$shortened")
+        fi
+    done
+
+    go test "${args[@]}"
+}
