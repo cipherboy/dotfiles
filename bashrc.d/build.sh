@@ -24,6 +24,7 @@ function build() {
     local do_deb="false"
     local do_sdeb="false"
     local do_popd="true"
+    local do_fmt="false"
     local use_clang="false"
     local use_afl="false"
     local use_parallel_build="true"
@@ -113,6 +114,8 @@ function build() {
             do_deb="true"
         elif [ "$arg" == "sdeb" ]; then
             do_sdeb="true"
+        elif [ "$arg" == "fmt" ]; then
+            do_fmt="true"
         elif [ "$arg" == "asan" ]; then
             cflags="$cflags -fsanitize=address"
             cxxflags="$cxxflags -fsanitize=address"
@@ -124,10 +127,12 @@ function build() {
             cxxflags="$cflags -fsanitize=undefined -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=object-size -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=nonnull-attribute -fsanitize=returns-nonnull-attribute -fsanitize=bool -fsanitize=enum -fsanitize=vptr -fsanitize=pointer-overflow -fsanitize=builtin"
         elif [ "$arg" == "ssg-rhel" ]; then
             cmake_args+=("-DSSG_PRODUCT_DEFAULT=OFF" "-DSSG_PRODUCT_RHEL7=ON" "-DSSG_PRODUCT_RHEL8=ON")
+        else
+            echo "Ignoring unrecognized option: [$arg]"
         fi
     done
 
-    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ] && [ "$do_deb" == "false" ] && [ "$do_sdeb" == "false" ]; then
+    if [ "$do_env" == "false" ] && [ "$do_clean" == "false" ] && [ "$do_prep" == "false" ] && [ "$do_build" == "false" ] && [ "$do_test" == "false" ] && [ "$do_rpm" == "false" ] && [ "$do_deb" == "false" ] && [ "$do_sdeb" == "false" ] && [ "$do_fmt" == "false" ]; then
         do_env="true"
         do_clean="true"
         do_prep="true"
@@ -213,6 +218,7 @@ function build() {
         echo "do_rpm: $do_rpm" 1>&2
         echo "do_deb: $do_deb" 1>&2
         echo "do_sdeb: $do_sdeb" 1>&2
+        echo "do_fmt: $do_fmt" 1>&2
     }
 
     function __build_env_jss() {
@@ -263,6 +269,10 @@ function build() {
         rm -rf out ../dist ../nspr/{Debug,Release}
     }
 
+    function __build_clean_cargo() {
+        cargo clean
+    }
+
     function __build_clean() {
         if [ -e "CMakeLists.txt" ] || [ -e meson.build ]; then
             # CMake must be higher priority than Makefile in case the project
@@ -282,6 +292,9 @@ function build() {
             return $?
         elif [ -e "pom.xml" ]; then
             __build_clean_maven
+            return $?
+        elif [ -e "Cargo.toml" ]; then
+            __build_clean_cargo
             return $?
 		elif [ -e "clean.bash" ]; then
 			if [ -e "../bin" ] && [ ! -e "../bin/go" ]; then
@@ -373,8 +386,8 @@ function build() {
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
             return $?
-        elif [ -e "pom.xml" ]; then
-            # Nothing to do for maven builds.
+        elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ]; then
+            # Nothing to do for maven or cargo builds.
             return 0
         elif [ -e "Makefile" ]; then
             # If there is already a Makefile, try running it :)
@@ -419,6 +432,11 @@ function build() {
         return $?
     }
 
+    function __build_cargo() {
+        time -p cargo build
+        return $?
+    }
+
     function __build() {
         if [ "$which_ninja" != "" ] && [ -e "build.ninja" ]; then
             echo "Building with ninja"
@@ -443,6 +461,9 @@ function build() {
 		elif [ -e "make.bash" ]; then
 			bash make.bash
 			return $?
+        elif [ -e "Cargo.toml" ]; then
+            __build_cargo
+            return $?
         elif [ -d "build" ]; then
             pushd build || return 1
             __build
@@ -466,16 +487,6 @@ function build() {
         return $?
     }
 
-    function __build_test_make_check() {
-        time -p make check
-        return $?
-    }
-
-    function __build_test_make_test() {
-        time -p make test
-        return $?
-    }
-
     function __build_test_make() {
         make -q check
         check_ret=$?
@@ -483,14 +494,10 @@ function build() {
         make -q test
         test_ret=$?
 
-        echo "$check_ret $test_ret"
-
         if [[ $check_ret == 1 ]]; then
-            __build_test_make_check
-            return $?
+            time -p make check
         elif [[ $test_ret == 1 ]]; then
-            __build_test_make_test
-            return $?
+            time -p make test
         else
             echo "Unknown make system! Targets 'test' and 'check' missing."
             return 1
@@ -527,6 +534,11 @@ function build() {
         return $ret
     }
 
+    function __build_test_cargo() {
+        time -p cargo test
+        return $?
+    }
+
     function __build_test() {
         if [ -e "CMakeCache.txt" ]; then
             __build_test_ctest
@@ -541,6 +553,9 @@ function build() {
             return $?
         elif [ -e "setup.py" ]; then
             __build_test_python
+            return $?
+        elif [ -e "Cargo.toml" ]; then
+            __build_test_cargo
             return $?
         elif [ -d "build" ]; then
             pushd build || return 1
@@ -594,6 +609,39 @@ function build() {
             debuild -S -k"${DEBIAN_KEY_ID:-Scheel}"
         else
             echo "Unknown deb system!"
+            return 1
+        fi
+    }
+
+    function __build_fmt_cargo() {
+        cargo fmt
+    }
+
+    function __build_fmt_make() {
+        make -q fmt
+        fmt_ret=$?
+
+        make -q format
+        format_ret=$?
+
+        if [[ $fmt_ret == 1 ]]; then
+            make fmt
+        elif [[ $format_ret == 1 ]]; then
+            make format
+        else
+            echo "Unknown make system! Targets 'fmt' and 'format' missing."
+            return 1
+        fi
+    }
+
+
+    function __build_fmt() {
+        if [ -e "Cargo.toml" ]; then
+            __build_fmt_cargo
+        elif [ -e "Makefile" ]; then
+            __build_fmt_make
+        else
+            echo "Unable to format project!"
             return 1
         fi
     }
@@ -677,6 +725,15 @@ function build() {
         ret="$?"
         if (( ret != 0 )); then
             echo "Source DEB failed with status: $ret"
+            return $ret
+        fi
+    fi
+
+    if [ "$do_fmt" == "true" ]; then
+        __build_fmt
+        ret="$?"
+        if (( ret != 0 )); then
+            echo "Format failed with status: $ret"
             return $ret
         fi
     fi
