@@ -224,14 +224,12 @@ function build() {
     function __build_env_jss() {
         if [ "$JAVA_HOME" == "" ] && [ -e tools/autoenv.sh ]; then
             source tools/autoenv.sh
-            return $?
         fi
     }
 
     function __build_env() {
         if [ -e "tools/autoenv.sh" ]; then
             __build_env_jss
-            return $?
         fi
     }
 
@@ -265,6 +263,14 @@ function build() {
         mvn clean
     }
 
+    function __build_clean_gradle() {
+        if [ -e "gradlew" ]; then
+            bash ./gradlew clean
+        else
+            gradle clean
+        fi
+    }
+
     function __build_clean_nss() {
         rm -rf out ../dist ../nspr/{Debug,Release}
     }
@@ -278,31 +284,26 @@ function build() {
             # CMake must be higher priority than Makefile in case the project
             # was built in-tree or includes other targets.
             __build_clean_cmake
-            return $?
         elif [ -e "nss.gyp" ]; then
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_clean_nss
-            return $?
         elif [ -e "Makefile" ]; then
             __build_clean_make
-            return $?
         elif [ -e "setup.py" ]; then
             __build_clean_python
-            return $?
         elif [ -e "pom.xml" ]; then
             __build_clean_maven
-            return $?
         elif [ -e "Cargo.toml" ]; then
             __build_clean_cargo
-            return $?
+        elif [ -e "gradle.properties" ]; then
+            __build_clean_gradle
 		elif [ -e "clean.bash" ]; then
 			if [ -e "../bin" ] && [ ! -e "../bin/go" ]; then
 				echo "Nothing to clean in Go build system"
 				return 0
 			fi
 			bash clean.bash
-			return $?
         elif [ -e "src" ]; then
             pushd src || return 1
             __build_clean
@@ -315,12 +316,10 @@ function build() {
 
     function __build_prep_cmake_ninja() {
         CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake "${cmake_args[@]}" -G Ninja ..
-        return $?
     }
 
     function __build_prep_cmake_make() {
         CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p cmake "${cmake_args[@]}" -G "Unix Makefiles" ..
-        return $?
     }
 
     function __build_prep_cmake() {
@@ -331,11 +330,9 @@ function build() {
         if [ "$which_ninja" == "" ]; then
             echo "Prepping with cmake/make"
             __build_prep_cmake_make
-            return $?
         else
             echo "Prepping with cmake/ninja"
             __build_prep_cmake_ninja
-            return $?
         fi
     }
 
@@ -358,13 +355,11 @@ function build() {
             path="./Configure"
         fi
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p "$path" "${config_args[@]}"
-        return $?
     }
 
     function __build_prep_python_setuptools() {
         $pypath -m pip install --user -r test-requirements.txt
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" $pypath setup.py check
-        return $?
     }
 
     function __build_prep_make_bootstrap() {
@@ -377,22 +372,18 @@ function build() {
     function __build_prep() {
         if [ -e "CMakeLists.txt" ]; then
             __build_prep_cmake
-            return $?
         elif [ -e "meson.build" ]; then
             __build_prep_meson
         elif [ -e "configure.ac" ] || [ -e "configure.in" ] || [ -e "configure" ] || [ -e "config" ] || [ -e "Configure" ]; then
             __build_prep_autotools
-            return $?
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
-            return $?
-        elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ]; then
-            # Nothing to do for maven or cargo builds.
+        elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ] || [ -e "gradle.properties" ]; then
+            # Nothing to do for maven, cargo, or gradle builds.
             return 0
         elif [ -e "Makefile" ]; then
             # If there is already a Makefile, try running it :)
             __build_prep_make_bootstrap
-            return $?
 		elif [ -e "run.bash" ] && [ -e "make.bash" ] && [ -e "clean.bash" ]; then
 			return 0
         elif [ -d "src" ]; then
@@ -409,61 +400,58 @@ function build() {
 
     function __build_make() {
         time -p make "${make_args[@]}"
-        return $?
     }
 
     function __build_ninja() {
         time -p $which_ninja "${ninja_args[@]}"
-        return $?
     }
 
     function __build_python() {
         CC="$ccpath" CXX="$cxxpath" CFLAGS="$cflags" CXXFLAGS="$cxxflags" time -p $pypath setup.py build
-        return $?
     }
 
     function __build_maven() {
         time -p mvn compile
-        return $?
     }
 
     function __build_nss() {
         time -p bash build.sh --enable-fips --enable-libpkix
-        return $?
     }
 
     function __build_cargo() {
         time -p cargo build
-        return $?
+    }
+
+    function __build_gradle() {
+        if [ -e "gradlew" ]; then
+            time -p bash ./gradlew build compileTestJava -x test -x check
+        else
+            time -p gradle build compileTestJava -x test -x check
+        fi
     }
 
     function __build() {
         if [ "$which_ninja" != "" ] && [ -e "build.ninja" ]; then
             echo "Building with ninja"
             __build_ninja
-            return $?
         elif [ -e "nss.gyp" ]; then
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_nss
-            return $?
         elif [ -e "Makefile" ]; then
             echo "Building with make"
             __build_make
-            return $?
         elif [ -e "setup.py" ]; then
             echo "Building with setup.py"
             __build_python
-            return $?
         elif [ -e "pom.xml" ]; then
             __build_maven
-            return $?
 		elif [ -e "make.bash" ]; then
 			bash make.bash
-			return $?
         elif [ -e "Cargo.toml" ]; then
             __build_cargo
-            return $?
+        elif [ -e "gradle.properties" ]; then
+            __build_gradle
         elif [ -d "build" ]; then
             pushd build || return 1
             __build
@@ -484,7 +472,6 @@ function build() {
 
     function __build_test_ctest() {
         time -p ctest "${ctest_args[@]}"
-        return $?
     }
 
     function __build_test_make() {
@@ -508,19 +495,15 @@ function build() {
         if [ -d tests ]; then
             if [ "$pypath" == "$py2path" ]; then
                 time -p pytest
-                return $?
             else
                 time -p pytest-3
-                return $?
             fi
         fi
         time -p $pypath setup.py test
-        return $?
     }
 
     function __build_test_maven() {
         time -p mvn test
-        return $?
     }
 
     function __build_test_nss() {
@@ -536,27 +519,29 @@ function build() {
 
     function __build_test_cargo() {
         time -p cargo test
-        return $?
+    }
+
+    function __build_test_gradle() {
+        if [ -e "gradlew" ]; then
+            time -p bash ./gradlew test check
+        else
+            time -p gradle test check
+        fi
     }
 
     function __build_test() {
         if [ -e "CMakeCache.txt" ]; then
             __build_test_ctest
-            return $?
         elif [ -e "nss.gyp" ]; then
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_test_nss
-            return $?
         elif [ -e "Makefile" ]; then
             __build_test_make
-            return $?
         elif [ -e "setup.py" ]; then
             __build_test_python
-            return $?
         elif [ -e "Cargo.toml" ]; then
             __build_test_cargo
-            return $?
         elif [ -d "build" ]; then
             pushd build || return 1
             __build_test
@@ -565,10 +550,10 @@ function build() {
             return $ret
         elif [ -d "pom.xml" ]; then
             __build_test_maven
-			return $?
 		elif [ -e "run.bash" ]; then
 			bash run.bash
-			return $?
+        elif [ -e "gradle.properties" ]; then
+            __build_test_gradle
         elif [ -d "src" ]; then
             pushd src || return 1
             __build_test
@@ -588,7 +573,6 @@ function build() {
     function __build_rpm() {
         if [ -e "build.sh" ]; then
             __build_rpm_script
-            return $?
         else
             echo "Unknown rpm system!"
             return 1
