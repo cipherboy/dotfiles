@@ -349,7 +349,7 @@ function build() {
             fi
         fi
         local path="./configure"
-        if [ -e "./config" ]; then
+        if [ -e "./config" ] && [ ! -d "./config" ]; then
             path="./config"
         elif [ -e "./Configure" ]; then
             path="./Configure"
@@ -374,7 +374,7 @@ function build() {
             __build_prep_cmake
         elif [ -e "meson.build" ]; then
             __build_prep_meson
-        elif [ -e "configure.ac" ] || [ -e "configure.in" ] || [ -e "configure" ] || [ -e "config" ] || [ -e "Configure" ]; then
+        elif [ -e "configure.ac" ] || [ -e "configure.in" ] || [ -e "configure" ] || [ -e "config" -a ! -d "config" ] || [ -e "Configure" ]; then
             __build_prep_autotools
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
