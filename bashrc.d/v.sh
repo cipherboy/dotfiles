@@ -223,7 +223,7 @@ function v() {(
         python3 -c "import collections, sys ; k=$k ; result = collections.defaultdict(lambda: 0)
 for z in map(lambda y: ( y[1] % k, y[0] ), (map(lambda x: tuple(map(int, x.strip().split(' '))), sys.stdin.readlines()))):
     result[z[0]] += z[1]
-print(result[0] == max(result.values()))"
+print(result[0] == max(result.values()) and (len(result) == 1 or (sorted(result.values())[-2]/max(result.values())) < 0.33))"
     }
 
     function __detect_spaces() {
