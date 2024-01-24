@@ -369,6 +369,12 @@ function build() {
         fi
     }
 
+    function __build_prep_gradle() {
+        if [ ! -e gradle/wrapper/gradle-wrapper.jar ]; then
+            time -p gradle wrapper
+        fi
+    }
+
     function __build_prep() {
         if [ -e "CMakeLists.txt" ]; then
             __build_prep_cmake
@@ -378,8 +384,10 @@ function build() {
             __build_prep_autotools
         elif [ -e "setup.py" ]; then
             __build_prep_python_setuptools
-        elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ] || [ -e "gradle.properties" ]; then
-            # Nothing to do for maven, cargo, or gradle builds.
+        elif [ -e "gradle.properties" ]; then
+            __build_prep_gradle
+        elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ]; then
+            # Nothing to do for maven or cargo builds.
             return 0
         elif [ -e "Makefile" ]; then
             # If there is already a Makefile, try running it :)
