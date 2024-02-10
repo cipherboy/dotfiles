@@ -188,17 +188,27 @@ function use_podman() {
     export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 }
 
-# Run go test, but for hashicorp vault.
-function vgt() {
+if [ ! -e /etc/docker ] && command -v podman >/dev/null 2>/dev/null ; then
+	use_podman
+fi
+
+# Run go test, but for OpenBao.
+function ogt() {(
+    if [ -z "$DOCKER_HOST" ]; then
+        use_podman
+    fi
+
+    gtcd
+
     local args=()
     for arg in "$@"; do
         local shortened="${arg#./.../}"
         if [ "$shortened" == "$arg" ]; then
             args+=("$arg")
         else
-            args+=("github.com/hashicorp/vault/$shortened")
+            args+=("github.com/openbao/openbao/$shortened")
         fi
     done
 
     go test "${args[@]}"
-}
+)}
