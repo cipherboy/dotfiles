@@ -359,12 +359,16 @@ function ghpr() {
     if (( exists == 0 )); then
         echo "Updating branch $name..."
         git checkout "$branch"
+        ret=$?
+        if (( ret != 0 )); then
+            echo "Failed to switch branches..."
+            return $ret
+        fi
     fi
 
     for remote in $(git remote); do
         git fetch "$remote" "pull/$number/head" >/dev/null 2>/dev/null
         ret=$?
-
         if (( ret != 0 )); then
             continue
         fi
