@@ -1,5 +1,5 @@
 # grep aliases
-GREP_EXCLUDE="--exclude=tags --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache --exclude-dir=node_modules --exclude-dir=.yarn --exclude=*chunk*.js --exclude=*chunk*.js.map --exclude=.eslintcache --exclude=yarn.lock"
+GREP_EXCLUDE="--exclude=tags --exclude-dir=http/web_ui --exclude-dir=web_ui --exclude-dir=.docusaurus --exclude-dir=.hg --exclude-dir=.git --exclude-dir=build --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache --exclude-dir=node_modules --exclude-dir=.yarn --exclude=*chunk*.js --exclude=*chunk*.js.map --exclude=.eslintcache --exclude=yarn.lock --exclude=openapi.json"
 alias gir="grep $GREP_EXCLUDE -iIr"
 alias gic="grep $GREP_EXCLUDE -nIHr"
 alias gif="grep $GREP_EXCLUDE -iInHr"

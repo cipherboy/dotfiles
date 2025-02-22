@@ -210,5 +210,12 @@ function ogt() {(
         fi
     done
 
-    go test "${args[@]}"
+    go test -timeout=45m "${args[@]}"
 )}
+
+function podman-purge() {
+    podman kill --all
+    podman rmi --all
+    podman rm --force --all
+    podman volume rm --force --all
+}
