@@ -288,7 +288,7 @@ function build() {
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_clean_nss
-        elif [ -e "Makefile" ]; then
+        elif [ -e "Makefile" ] || [ -e "GNUmakefile" ]; then
             __build_clean_make
         elif [ -e "setup.py" ]; then
             __build_clean_python
@@ -389,7 +389,7 @@ function build() {
         elif [ -e "pom.xml" ] || [ -e "Cargo.toml" ]; then
             # Nothing to do for maven or cargo builds.
             return 0
-        elif [ -e "Makefile" ]; then
+        elif [ -e "Makefile" ] || [ -e "GNUmakefile" ]; then
             # If there is already a Makefile, try running it :)
             __build_prep_make_bootstrap
 		elif [ -e "run.bash" ] && [ -e "make.bash" ] && [ -e "clean.bash" ]; then
@@ -446,7 +446,7 @@ function build() {
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_nss
-        elif [ -e "Makefile" ]; then
+        elif [ -e "Makefile" ] || [ -e "GNUmakefile" ]; then
             echo "Building with make"
             __build_make
         elif [ -e "setup.py" ]; then
@@ -544,7 +544,7 @@ function build() {
             # NSS must be higher priority than Makefile because we use gyp and
             # its build.sh script instead.
             __build_test_nss
-        elif [ -e "Makefile" ]; then
+        elif [ -e "Makefile" ] || [ -e "GNUmakefile" ]; then
             __build_test_make
         elif [ -e "setup.py" ]; then
             __build_test_python
@@ -630,7 +630,7 @@ function build() {
     function __build_fmt() {
         if [ -e "Cargo.toml" ]; then
             __build_fmt_cargo
-        elif [ -e "Makefile" ]; then
+        elif [ -e "Makefile" ] || [ -e "GNUmakefile" ]; then
             __build_fmt_make
         else
             echo "Unable to format project!"
